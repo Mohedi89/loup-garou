@@ -1,5 +1,5 @@
 const CACHE_NAME = 'loup-garou-v1';
-const FILES = ['./loup-garou.html'];
+const FILES = ['./index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(FILES)));
