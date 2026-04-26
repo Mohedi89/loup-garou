@@ -2,7 +2,7 @@
   "name": "لعبة الذئب",
   "short_name": "الذئب",
   "description": "Loup Garou — النسخة الكاملة بالدارجة",
-  "start_url": "./loup-garou.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a14",
   "theme_color": "#0d0d1a",
