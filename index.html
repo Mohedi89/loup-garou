@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الذئب">
+<title>لعبة الذئب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a14;
+    --surface: #12121f;
+    --surface2: #1a1a2e;
+    --border: #2a2a45;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --gold: #f39c12;
+    --silver: #95a5a6;
+    --wolf: #8e44ad;
+    --village: #27ae60;
+    --solo: #2980b9;
+    --text: #e8e8f0;
+    --text2: #a0a0c0;
+    --danger: #e74c3c;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* =================== SCREENS =================== */
+  .screen { display: none; min-height: 100vh; padding: 16px; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* =================== HOME =================== */
+  #home {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 20%, #1a0a2e 0%, var(--bg) 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  #home::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(192,57,43,0.15) 0%, transparent 70%);
+    top: -100px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .moon {
+    width: 100px; height: 100px;
+    background: radial-gradient(circle at 35% 35%, #fff9e6, #f0c060);
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(240,192,96,0.4), 0 0 80px rgba(240,192,96,0.15);
+    margin-bottom: 20px;
+    position: relative;
+    animation: moonGlow 3s ease-in-out infinite;
+  }
+  @keyframes moonGlow {
+    0%,100% { box-shadow: 0 0 40px rgba(240,192,96,0.4), 0 0 80px rgba(240,192,96,0.15); }
+    50% { box-shadow: 0 0 60px rgba(240,192,96,0.6), 0 0 120px rgba(240,192,96,0.25); }
+  }
+  .home-title { font-size: 2.8em; font-weight: 900; text-align: center; line-height: 1.1; }
+  .home-title span { color: var(--accent2); }
+  .home-sub { color: var(--text2); margin: 8px 0 32px; font-size: 0.95em; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 28px; border-radius: var(--radius);
+    font-family: 'Cairo', sans-serif; font-size: 1em; font-weight: 700;
+    cursor: pointer; border: none; transition: all 0.2s; width: 100%; max-width: 320px;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b1a1a);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(192,57,43,0.4);
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:active { transform: scale(0.97); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn + .btn { margin-top: 10px; }
+
+  /* =================== HEADER =================== */
+  .header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0 16px;
+  }
+  .back-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 10px;
+    cursor: pointer; font-size: 1.1em; flex-shrink: 0;
+  }
+  .header h2 { font-size: 1.2em; font-weight: 700; }
+
+  /* =================== SETUP =================== */
+  .section-title {
+    font-size: 0.8em; font-weight: 700; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin: 20px 0 10px;
+  }
+  .input-row {
+    display: flex; gap: 8px; margin-bottom: 12px;
+  }
+  input[type="text"], input[type="number"] {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px; border-radius: var(--radius);
+    font-family: 'Cairo', sans-serif; font-size: 1em;
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+  input[type="number"] { width: 70px; flex: none; text-align: center; }
+  .add-btn {
+    background: var(--accent); color: #fff; border: none;
+    padding: 12px 16px; border-radius: var(--radius);
+    font-size: 1.2em; cursor: pointer; flex-shrink: 0;
+  }
+  .player-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: var(--radius); margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chip-remove { background: none; border: none; color: var(--danger); font-size: 1.2em; cursor: pointer; }
+
+  /* =================== ROLES GRID =================== */
+  .roles-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .role-card {
+    background: var(--surface2); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 10px 12px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    user-select: none;
+  }
+  .role-card.selected { border-color: var(--accent2); background: rgba(231,76,60,0.1); }
+  .role-card.selected-wolf { border-color: var(--wolf); background: rgba(142,68,173,0.1); }
+  .role-card.selected-village { border-color: var(--village); background: rgba(39,174,96,0.1); }
+  .role-card.selected-solo { border-color: var(--solo); background: rgba(41,128,185,0.1); }
+  .role-name { font-weight: 700; font-size: 0.9em; }
+  .role-team {
+    font-size: 0.72em; color: var(--text2); margin-top: 2px;
+  }
+  .role-count {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--accent); color: #fff;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75em; font-weight: 700;
+  }
+  .role-count.wolf { background: var(--wolf); }
+  .role-count.village { background: var(--village); }
+  .role-count.solo { background: var(--solo); }
+  .role-emoji { font-size: 1.4em; }
+  .role-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .count-controls {
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+  }
+  .cnt-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); width: 26px; height: 26px; border-radius: 6px;
+    cursor: pointer; font-size: 1em; display: flex; align-items: center; justify-content: center;
+  }
+  .cnt-num { font-weight: 700; min-width: 16px; text-align: center; font-size: 0.9em; }
+
+  /* =================== NIGHT ORDER =================== */
+  .night-step {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .step-num {
+    background: var(--accent); color: #fff;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85em; flex-shrink: 0;
+  }
+  .step-info { flex: 1; }
+  .step-role { font-weight: 700; font-size: 0.95em; }
+  .step-desc { font-size: 0.78em; color: var(--text2); margin-top: 2px; }
+
+  /* =================== GAME SCREEN =================== */
+  #game { background: var(--bg); }
+  .game-phase {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 12px 16px; margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .phase-label { font-size: 0.8em; color: var(--text2); }
+  .phase-value { font-weight: 700; font-size: 1.1em; }
+  .night-badge {
+    background: rgba(142,68,173,0.2); color: #b980e0;
+    border: 1px solid rgba(142,68,173,0.4);
+    padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 700;
+  }
+  .day-badge {
+    background: rgba(243,156,18,0.2); color: #f3a828;
+    border: 1px solid rgba(243,156,18,0.4);
+    padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 700;
+  }
+
+  /* Player list in game */
+  .players-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .player-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+    transition: all 0.2s;
+  }
+  .player-row.dead {
+    opacity: 0.4; background: var(--surface);
+    text-decoration: line-through;
+  }
+  .player-row.selected-p { border-color: var(--accent2); background: rgba(231,76,60,0.1); }
+  .player-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2em; background: var(--surface); flex-shrink: 0;
+  }
+  .player-name-g { flex: 1; font-weight: 600; }
+  .player-role-badge {
+    font-size: 0.72em; padding: 3px 8px; border-radius: 20px;
+    font-weight: 700;
+  }
+  .badge-wolf { background: rgba(142,68,173,0.3); color: #b980e0; }
+  .badge-village { background: rgba(39,174,96,0.3); color: #5dcc85; }
+  .badge-solo { background: rgba(41,128,185,0.3); color: #5baee0; }
+  .badge-dead { background: rgba(120,120,120,0.3); color: #888; }
+
+  /* Night step card */
+  .active-step-card {
+    background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(192,57,43,0.1));
+    border: 1px solid rgba(142,68,173,0.4);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+  }
+  .step-title { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
+  .step-instruction { font-size: 0.85em; color: var(--text2); line-height: 1.5; }
+
+  /* Action buttons */
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .action-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px; border-radius: var(--radius);
+    font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 0.85em;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .action-btn.success { border-color: var(--village); color: #5dcc85; }
+  .action-btn.wolf { border-color: var(--wolf); color: #b980e0; }
+
+  /* Log */
+  .event-log {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; margin-top: 12px;
+    max-height: 180px; overflow-y: auto;
+  }
+  .log-title { font-size: 0.8em; color: var(--text2); margin-bottom: 8px; font-weight: 700; }
+  .log-item {
+    font-size: 0.82em; color: var(--text2); padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-night { color: #b980e0; font-weight: 700; flex-shrink: 0; }
+  .log-day { color: #f3a828; font-weight: 700; flex-shrink: 0; }
+
+  /* Score / stats */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px; text-align: center;
+  }
+  .stat-num { font-size: 1.6em; font-weight: 900; }
+  .stat-label { font-size: 0.72em; color: var(--text2); margin-top: 2px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 20px; border-radius: 30px;
+    font-size: 0.9em; font-weight: 600; z-index: 999;
+    animation: toastIn 0.3s ease; white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 100;
+    align-items: flex-end; justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px 20px 20px 20px; padding: 20px; width: 100%; max-width: 420px;
+    max-height: 80vh; overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-title { font-size: 1.1em; font-weight: 700; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions .btn { flex: 1; }
+
+  /* Role info */
+  .role-info-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; margin-bottom: 8px;
+  }
+  .ri-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .ri-emoji { font-size: 1.5em; }
+  .ri-name { font-weight: 700; }
+  .ri-team { font-size: 0.75em; }
+  .ri-desc { font-size: 0.82em; color: var(--text2); line-height: 1.5; }
+
+  /* Day vote */
+  .vote-section { margin-bottom: 16px; }
+  .vote-title { font-weight: 700; margin-bottom: 8px; }
+  .vote-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px; margin-bottom: 6px;
+  }
+  .vote-name { flex: 1; font-weight: 600; }
+  .vote-num {
+    font-weight: 700; font-size: 1.1em; min-width: 24px; text-align: center;
+  }
+  .vote-btn { background: none; border: 1px solid var(--border); color: var(--text); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
+
+  /* End screen */
+  #end {
+    align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #1a0a0a 0%, var(--bg) 70%);
+    text-align: center;
+  }
+  .trophy { font-size: 5em; margin-bottom: 16px; animation: bounce 1s ease infinite; }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .win-title { font-size: 2em; font-weight: 900; margin-bottom: 8px; }
+  .win-subtitle { color: var(--text2); margin-bottom: 32px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab {
+    flex: 1; padding: 8px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-weight: 600; font-size: 0.85em; color: var(--text2); text-align: center;
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.75em; font-weight: 700; margin-right: 4px; }
+  .tag-wolf { background: rgba(142,68,173,0.3); color: #b980e0; }
+  .tag-village { background: rgba(39,174,96,0.3); color: #5dcc85; }
+  .tag-solo { background: rgba(41,128,185,0.3); color: #5baee0; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .player-card-role {
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; margin-bottom: 12px; text-align: center;
+  }
+  .role-big-emoji { font-size: 3em; }
+  .role-big-name { font-size: 1.3em; font-weight: 700; }
+  .role-big-team { font-size: 0.85em; }
+
+  .highlight { color: var(--accent2); }
+  .wolf-highlight { color: #b980e0; }
+  .village-highlight { color: #5dcc85; }
+
+  .bottom-pad { height: 40px; }
+
+  /* Infection choice */
+  .infect-options { display: flex; flex-direction: column; gap: 8px; }
+  .infect-opt {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; cursor: pointer;
+    font-weight: 600; transition: all 0.2s;
+  }
+  .infect-opt:active { transform: scale(0.98); }
+  .infect-opt.chosen-kill {
+    background: rgba(231,76,60,0.18); border-color: var(--accent2);
+    color: #ff9080;
+  }
+  .infect-opt.chosen-protect {
+    background: rgba(39,174,96,0.18); border-color: var(--village);
+    color: #5dcc85;
+  }
+
+  /* Warning */
+  .warning-box {
+    background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.4);
+    border-radius: var(--radius); padding: 12px; margin: 8px 0;
+    font-size: 0.85em; color: #ff9080; line-height: 1.5;
+  }
+  .info-box {
+    background: rgba(41,128,185,0.1); border: 1px solid rgba(41,128,185,0.4);
+    border-radius: var(--radius); padding: 12px; margin: 8px 0;
+    font-size: 0.85em; color: #80b8e0; line-height: 1.5;
+  }
+
+  .wolf-count-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(142,68,173,0.15); border: 1px solid rgba(142,68,173,0.3);
+    border-radius: 30px; padding: 4px 12px;
+    font-size: 0.8em; font-weight: 700; color: #b980e0;
+  }
+</style>
+</head>
+<body>
+
+<!-- =================== HOME =================== -->
+<div id="home" class="screen active">
+  <div class="moon"></div>
+  <h1 class="home-title">🐺 لعبة<br><span>الذئب</span></h1>
+  <p class="home-sub">Loup Garou — النسخة الكاملة</p>
+  <button class="btn btn-primary" onclick="openSeating()">🎮 لعبة جديدة</button>
+  <button class="btn btn-secondary" onclick="showScreen('roles-info')" style="margin-top:10px">📖 شرح الأدوار</button>
+</div>
+
+<!-- =================== SEATING =================== -->
+<div id="seating" class="screen">
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px">
+    <button class="back-btn" onclick="showScreen('home')">→</button>
+    <h2 style="font-size:1.2em;font-weight:700">🪑 تحديد الكراسي</h2>
+  </div>
+
+  <!-- Seat counter -->
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:0.95em;color:var(--text2)">عدد الكراسي</span>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button onclick="changeSeats(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:1.3em;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
+      <span id="seatCount" style="font-size:1.8em;font-weight:900;min-width:36px;text-align:center">8</span>
+      <button onclick="changeSeats(1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:1.3em;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+    </div>
+  </div>
+
+  <!-- Circle -->
+  <div style="display:flex;justify-content:center;margin-bottom:16px">
+    <div id="seatingCircle" style="position:relative;width:290px;height:290px"></div>
+  </div>
+
+  <!-- Players filled counter -->
+  <div id="seatingProgress" style="text-align:center;font-size:0.85em;color:var(--text2);margin-bottom:16px"></div>
+
+  <button class="btn btn-primary" onclick="goToRolesFromSeating()" id="seatingConfirmBtn" style="max-width:320px;margin:0 auto" disabled>🎭 اختيار الأدوار</button>
+  <div class="bottom-pad"></div>
+</div>
+
+<!-- =================== ROLES SETUP =================== -->
+<div id="roles-setup" class="screen">
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px">
+    <button class="back-btn" onclick="showScreen('seating')">→</button>
+    <h2 style="font-size:1.2em;font-weight:700">🎭 اختيار الأدوار</h2>
+  </div>
+
+  <!-- Player count badge -->
+  <div id="rolesSetupHeader" style="margin-bottom:12px"></div>
+
+  <!-- Overflow resolver -->
+  <div id="overflowResolver" style="display:none;margin-bottom:12px"></div>
+
+  <!-- Role filter tabs -->
+  <div class="tabs" style="margin-bottom:12px">
+    <div class="tab active" onclick="filterRolesNew('all',this)">الكل</div>
+    <div class="tab" onclick="filterRolesNew('wolf',this)">ذياب 🐺</div>
+    <div class="tab" onclick="filterRolesNew('village',this)">قرويين 🏡</div>
+    <div class="tab" onclick="filterRolesNew('solo',this)">منفرد 🎯</div>
+  </div>
+
+  <div id="rolesGridNew" class="roles-grid"></div>
+
+  <div class="divider"></div>
+  <div id="setupSummaryNew" style="margin-bottom:16px"></div>
+  <button class="btn btn-primary" onclick="startGame()" id="startBtnNew" disabled>🌙 ابدأ اللعبة</button>
+  <div class="bottom-pad"></div>
+</div>
+
+<!-- =================== ROLES INFO =================== -->
+<div id="roles-info" class="screen">
+  <div class="header">
+    <button class="back-btn" onclick="showScreen('home')">→</button>
+    <h2>شرح الأدوار</h2>
+  </div>
+  <div id="rolesInfoContent"></div>
+  <div class="bottom-pad"></div>
+</div>
+
+<!-- =================== DISTRIBUTE ROLES =================== -->
+<div id="distribute" class="screen">
+  <div class="header">
+    <h2>توزيع الأدوار</h2>
+  </div>
+  <div class="info-box">كل لاعب يشوف الدور متاعو وحدو 🤫</div>
+  <div id="distributeContent"></div>
+  <button class="btn btn-primary" id="distributeNextBtn" onclick="distributeNext()">👁️ شوف دورك</button>
+  <div class="bottom-pad"></div>
+</div>
+
+<!-- =================== GAME =================== -->
+<div id="game" class="screen">
+  <div class="game-phase">
+    <div>
+      <div class="phase-label">الجولة</div>
+      <div class="phase-value" id="roundNum">1</div>
+    </div>
+    <div id="phaseBadge" class="night-badge">🌙 ليل</div>
+    <div>
+      <div class="phase-label">الأحياء</div>
+      <div class="phase-value" id="aliveCount">—</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num village-highlight" id="statVillage">—</div>
+      <div class="stat-label">قرويين</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num wolf-highlight" id="statWolf">—</div>
+      <div class="stat-label">ذياب</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num highlight" id="statSolo">—</div>
+      <div class="stat-label">منفرد</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="gameTab('night',this)">🌙 ليل</div>
+    <div class="tab" onclick="gameTab('day',this)">☀️ نهار</div>
+    <div class="tab" onclick="gameTab('players',this)">👥 لاعبين</div>
+    <div class="tab" onclick="gameTab('log',this)">📋 سجل</div>
+  </div>
+
+  <div id="tabNight">
+    <div id="nightContent"></div>
+    <button class="btn btn-secondary" onclick="nextNightStep()" id="nightNextBtn" style="margin-bottom:8px">التالي ←</button>
+    <button class="btn btn-primary" onclick="startDay()" id="startDayBtn" style="display:none">☀️ ابدأ النهار</button>
+  </div>
+
+  <div id="tabDay" style="display:none">
+    <div class="active-step-card">
+      <div class="step-title">☀️ وقت النقاش والتصويت</div>
+      <div class="step-instruction">ناقشو مع بعضكم واختارو شكون يتعدم</div>
+    </div>
+    <!-- Elian / Barbier day signal buttons -->
+    <div id="daySignalButtons"></div>
+    <div id="dayContent"></div>
+    <button class="btn btn-primary" onclick="executeVote()" id="executeBtn">⚖️ نفّذ التصويت</button>
+    <div class="divider"></div>
+    <button class="btn btn-ghost" onclick="nextNight()" style="margin-bottom:8px">🌙 جاوز للليلة الجاية</button>
+  </div>
+
+  <div id="tabPlayers" style="display:none">
+    <div class="players-list" id="gamePlayersList"></div>
+  </div>
+
+  <div id="tabLog" style="display:none">
+    <div class="event-log" style="max-height:none" id="fullLog"></div>
+  </div>
+
+  <div class="bottom-pad"></div>
+</div>
+
+<!-- =================== END =================== -->
+<div id="end" class="screen">
+  <div class="trophy" id="endTrophy">🏆</div>
+  <div class="win-title" id="endTitle">فاز الذياب!</div>
+  <div class="win-subtitle" id="endSubtitle">ما بقاش قرويين كافيين</div>
+  <div style="margin-top:24px;width:100%;max-width:320px">
+    <button class="btn btn-primary" onclick="openSeating()">🎮 لعبة جديدة</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="showScreen('home')">🏠 الرئيسية</button>
+  </div>
+</div>
+
+<!-- =================== MODALS =================== -->
+<div id="modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">عنوان</div>
+    <div id="modalContent"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// DATA
+// =============================================
+const ROLES = [
+  // Wolves
+  {
+    id: 'loup_garou', name: 'ذيب عادي', emoji: '🐺', team: 'wolf',
+    teamLabel: `فريق الذياب`,
+    desc: `كل ليلة يصوت مع الذياب على شكون يقتلو. يفوزو كي يساوو عدد القرويين.`,
+    nightAction: true, unique: false, maxCount: 10
+  },
+  {
+    id: 'loup_infect', name: 'الذيب المُعدي', emoji: '☣️', team: 'wolf',
+    teamLabel: `فريق الذياب`,
+    desc: `يصوت مع الذياب. بعد القتل يقدر يقترح يجيب الضحية معهم ذيب. الضحية تختار تبقى قروي أو تولي ذيب. عندو الحق مرة برك. يقدر يستحفظ الإصابة لليلة أخرى.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'loup_noir', name: 'الذيب الأسود', emoji: '🖤', team: 'wolf',
+    teamLabel: `فريق الذياب`,
+    desc: `يصوت مع الذياب على الضحية. بعدها يقوم وحدو ويختار شخص ما يقدرش يتكلم في النقاش.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'loup_rouge', name: 'الذيب الأحمر', emoji: '🔴', team: 'wolf',
+    teamLabel: `فريق الذياب`,
+    desc: `يصوت مع الذياب. بعدها يقوم وحدو ويختار شخص يشوف دوره.`,
+    nightAction: true, unique: true
+  },
+  // Village
+  {
+    id: 'voyante', name: 'العرّافة', emoji: '🔮', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `كل ليلة تقوم وتختار شخص. الراوي يريها دوره الحقيقي.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'sorciere', name: 'الساحرة', emoji: '🧙', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `عندها دواء للإنقاذ وسم للقتل — كل واحد يستعمل مرة برك في اللعبة.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'chasseur', name: 'الصياد', emoji: '🔫', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `كي يموت يقدر يقتل شخص آخر معاه فوراً.`,
+    nightAction: false, unique: true
+  },
+  {
+    id: 'cupidon', name: 'كيوبيد', emoji: '💘', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `الليلة الأولى يربط زوج ناس بالحب. إذا مات واحد منهم يموت الآخر معاه.`,
+    nightAction: true, unique: true, firstNightOnly: true
+  },
+  {
+    id: 'barbier', name: 'الحلاق', emoji: '✂️', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `يقوم ويكشف دور شخص. إذا كان ذيب يموت الذيب. إذا غلط يموت هو والشخص اللي غلط في دوره.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'ancien', name: 'الشيخ', emoji: '👴', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `عنده زوز أرواح — الليلة الأولى ما يموتش من الذياب. كي يموت بالتصويت الأدوار الخاصة للقرويين تسقط ويرجعو قرويين عاديين. يختار من وين يبدأ الكلام وعند التعادل.`,
+    nightAction: false, unique: true
+  },
+  {
+    id: 'pute', name: 'اللعوبة', emoji: '💋', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `كل ليلة تختار مع من تنام. إذا قتلوها يموت اللي ختارته معاها.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'corbeau', name: 'الغراب', emoji: '🐦‍⬛', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `كل ليلة يختار شخص يهزله زوز صوابع زيادة في التصويت.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'ours', name: 'الدب', emoji: '🐻', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `ما يقومش في الليل. الراوي يقول إذا فما ذيب على جنبه اليمين أو اليسار — يقرقر الدب. إذا القرويين كيفه على الجنبتين ما يقرقرش.`,
+    nightAction: false, unique: true
+  },
+  {
+    id: 'berger', name: 'الراعي', emoji: '🐑', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `عنده زوز خراف. كل ليلة يرمي خروف أو خروفين على شخص/شخصين. إذا رماه على قروي يرجعله. إذا رماه على ذيب يخسره.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'servant', name: 'الخادم', emoji: '🤵', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `قروي عادي. كي يموت أي شخص يقدر ياخذ دوره — قروي أو ذيب أو منفرد.`,
+    nightAction: false, unique: true
+  },
+  {
+    id: 'protecteur', name: 'الحارس', emoji: '🛡️', team: 'village',
+    teamLabel: `فريق القرية`,
+    desc: `كل ليلة يختار شخص يحميه من الذياب. ما يقدرش يختار نفس الشخص مرتين جرت بعضهم، وما يقدرش يحمي روحه مرتين جرت بعضهم.`,
+    nightAction: true, unique: true
+  },
+  // Solo
+  {
+    id: 'elian', name: 'إليان', emoji: '🎯', team: 'solo',
+    teamLabel: `يلعب منفرد`,
+    desc: `يعطي إشارة للراوي يرقّد الجميع. يكشف دور شخص. إذا صح يموت ذلك الشخص ويكمل. إذا غلط يموت هو.`,
+    nightAction: true, unique: true
+  },
+  {
+    id: 'enfant_sauvage', name: 'الطفل البري', emoji: '🧒', team: 'solo',
+    teamLabel: `يلعب منفرد / قروي`,
+    desc: `قروي عادي. كل ليلة يختار شخص يرقد معاه. إذا مات هذا الشخص الليلة اللي بعدها يولي مع الذياب.`,
+    nightAction: true, unique: true
+  },
+];
+
+const NIGHT_ORDER = [
+  'protecteur','cupidon','enfant_sauvage','voyante','loup_garou','loup_infect','loup_noir','loup_rouge',
+  'sorciere','pute','corbeau','berger','elian_signal','barbier_signal'
+];
+
+// =============================================
+// STATE
+// =============================================
+let state = {
+  players: [],
+  selectedRoles: {},
+  assignedRoles: {},
+  dead: {},
+  night: 1,
+  phase: 'night',
+  nightStepIndex: 0,
+  activeNightSteps: [],
+  votes: {},
+  eventLog: [],
+  lovers: [],
+  infectUsed: false,
+  infectPubliclyUsed: false, // for display - always show loup_infect as available
+  infectedPlayer: null, // player who joined wolves via infection
+  ancienDead: false,
+  ancienVillageRolesDropped: false,
+  witchSaveUsed: false,
+  witchKillUsed: false,
+  shepherdSheep: 2,
+  distributeIndex: 0,
+  corbeauTarget: null,
+  puteTarget: null,
+  silenced: null,
+  lupNoirSilenced: null,
+  enfantSauvageParent: null,
+  enfantBecameWolf: false,
+  servantCanTake: null,
+  // Night report tracking
+  voyanteSawPlayer: null,
+  voyanteSawRole: null,
+  lupRougeSawPlayer: null,
+  lupRougeSawRole: null,
+  bergerActions: [], // [{player, isWolf, returned}]
+  bergerPendingCount: 0,
+  bergerSentThisRound: 0,
+  oursGrowled: null, // true/false/null
+  ancienStartSide: null, // 'right'/'left' or player name
+  ancienStartPlayer: null,
+  seatCount: 8,
+  seatNames: [], // names assigned per seat index
+};
+
+// =============================================
+// UTILS
+// =============================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// =============================================
+// SAVED PLAYERS (localStorage)
+// =============================================
+function getSavedPlayers() {
+  try { return JSON.parse(localStorage.getItem('lgAllPlayers') || '[]'); } catch(e) { return []; }
+}
+function savePlayerToHistory(name) {
+  if(!name) return;
+  const all = getSavedPlayers();
+  if(!all.includes(name)) { all.push(name); localStorage.setItem('lgAllPlayers', JSON.stringify(all)); }
+}
+function removeFromHistory(name) {
+  const all = getSavedPlayers().filter(p => p !== name);
+  localStorage.setItem('lgAllPlayers', JSON.stringify(all));
+}
+
+// =============================================
+// SEATING SCREEN
+// =============================================
+function openSeating() {
+  // Reset seat names to match current count
+  while(state.seatNames.length < state.seatCount) state.seatNames.push('');
+  state.seatNames = state.seatNames.slice(0, state.seatCount);
+  showScreen('seating');
+  renderSeatingCircle();
+}
+
+function changeSeats(delta) {
+  state.seatCount = Math.max(5, Math.min(20, state.seatCount + delta));
+  document.getElementById('seatCount').textContent = state.seatCount;
+  while(state.seatNames.length < state.seatCount) state.seatNames.push('');
+  state.seatNames = state.seatNames.slice(0, state.seatCount);
+  renderSeatingCircle();
+}
+
+function renderSeatingCircle() {
+  const el = document.getElementById('seatingCircle');
+  if(!el) return;
+  const n = state.seatCount;
+  while(state.seatNames.length < n) state.seatNames.push('');
+
+  const size = 290;
+  const cx = size / 2, cy = size / 2;
+  const R = 108;
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+  el.innerHTML = '';
+
+  // Center wolf icon
+  const center = document.createElement('div');
+  center.style.cssText = `position:absolute;width:56px;height:56px;left:${cx-28}px;top:${cy-28}px;
+    border-radius:50%;background:radial-gradient(circle,rgba(192,57,43,0.25),rgba(142,68,173,0.08));
+    border:1px solid rgba(192,57,43,0.35);display:flex;align-items:center;justify-content:center;font-size:1.5em;`;
+  center.textContent = '🐺';
+  el.appendChild(center);
+
+  const filled = state.seatNames.filter(n => n && n.trim()).length;
+
+  for(let i = 0; i < n; i++) {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    const x = cx + R * Math.cos(angle);
+    const y = cy + R * Math.sin(angle);
+    const name = state.seatNames[i] || '';
+    const hasPerson = !!name;
+
+    const seat = document.createElement('div');
+    seat.style.cssText = `position:absolute;width:52px;height:52px;
+      left:${x-26}px;top:${y-26}px;border-radius:50%;
+      background:${hasPerson ? 'rgba(192,57,43,0.2)' : 'var(--surface2)'};
+      border:2px solid ${hasPerson ? '#c0392b' : 'var(--border)'};
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:${hasPerson ? '0.58em' : '0.75em'};font-weight:700;
+      text-align:center;line-height:1.15;padding:3px;
+      color:${hasPerson ? 'var(--text)' : 'var(--text2)'};word-break:break-all;
+      box-shadow:${hasPerson ? '0 0 10px rgba(192,57,43,0.3)' : 'none'};`;
+    seat.textContent = name ? name.substring(0, 7) : (i+1)+'';
+    seat.onclick = () => promptSeatName(i);
+    el.appendChild(seat);
+
+    // Seat number label outside circle for empty seats
+    if(!hasPerson) {
+      const lbl = document.createElement('div');
+      const lx = cx + (R+28) * Math.cos(angle);
+      const ly = cy + (R+28) * Math.sin(angle);
+      lbl.style.cssText = `position:absolute;width:20px;height:20px;left:${lx-10}px;top:${ly-10}px;
+        font-size:0.6em;color:rgba(160,160,192,0.5);text-align:center;line-height:20px;pointer-events:none;`;
+    }
+  }
+
+  // Progress
+  const prog = document.getElementById('seatingProgress');
+  if(prog) prog.innerHTML = `<span style="color:${filled===n?'#5dcc85':'var(--text2)'}">${filled} / ${n} لاعبين محددين</span>`;
+
+  // Enable confirm button when at least 5 filled
+  const btn = document.getElementById('seatingConfirmBtn');
+  if(btn) btn.disabled = filled < 5;
+}
+
+function promptSeatName(idx) {
+  const existing = state.seatNames[idx] || '';
+  const savedAll = getSavedPlayers();
+  // Filter out names already assigned to OTHER seats
+  const usedElsewhere = state.seatNames.filter((n,i) => i !== idx && n && n.trim());
+  const available = savedAll.filter(p => !usedElsewhere.includes(p));
+
+  const savedHTML = available.length > 0 ? `
+    <div style="margin-top:14px;margin-bottom:6px;font-size:0.8em;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">
+      👥 من اللاعبين المسجلين
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;max-height:140px;overflow-y:auto;padding:2px">
+      ${available.map(p => `
+        <div style="display:flex;align-items:center;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border)">
+          <div onclick="assignSeat(${idx},'${p.replace(/'/g,"\\'")}');closeModal()" 
+               style="background:var(--surface);padding:6px 12px;cursor:pointer;font-size:0.88em;font-weight:600">
+            👤 ${p}
+          </div>
+          <div onclick="removeFromHistory('${p.replace(/'/g,"\\'")}');promptSeatName(${idx})"
+               style="background:rgba(231,76,60,0.15);padding:6px 8px;cursor:pointer;font-size:0.75em;color:#e74c3c;border-right:1px solid var(--border)"
+               title="احذف من القائمة">✕</div>
+        </div>`).join('')}
+    </div>` : '';
+
+  showModal(`🪑 كرسي ${idx+1}`, `
+    <div style="font-size:0.88em;color:var(--text2);margin-bottom:10px">اكتب اسم لاعب جديد:</div>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <input id="seatNameInput" type="text" placeholder="الاسم..." value="${existing}"
+        style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:10px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:1em;outline:none"
+        onkeypress="if(event.key==='Enter'){const v=this.value.trim();if(v){assignSeat(${idx},v);closeModal();}}" >
+      <button onclick="const v=document.getElementById('seatNameInput').value.trim();if(v){assignSeat(${idx},v);closeModal();}"
+        style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0 14px;cursor:pointer;font-size:1.1em">✓</button>
+    </div>
+    ${existing ? `<div onclick="assignSeat(${idx},'');closeModal()" style="color:#e74c3c;font-size:0.82em;cursor:pointer;text-align:center;padding:6px 0">🗑️ مسح هذا الكرسي</div>` : ''}
+    ${savedHTML}
+  `, []);
+  setTimeout(() => { const inp = document.getElementById('seatNameInput'); if(inp){ inp.focus(); inp.select(); }}, 150);
+}
+
+function assignSeat(idx, name) {
+  state.seatNames[idx] = name ? name.trim() : '';
+  if(name && name.trim()) savePlayerToHistory(name.trim());
+  renderSeatingCircle();
+}
+
+function goToRolesFromSeating() {
+  // Build players list from seat order
+  state.players = state.seatNames.filter(n => n && n.trim());
+  if(state.players.length < 5) { toast('محتاج 5 لاعبين على الأقل!'); return; }
+  // Reset selected roles
+  state.selectedRoles = {};
+  showScreen('roles-setup');
+  renderRolesGridNew();
+  updateRolesSetupHeader();
+}
+
+// =============================================
+// NEW ROLES SETUP SCREEN
+// =============================================
+let currentRoleFilterNew = 'all';
+
+function filterRolesNew(f, el) {
+  currentRoleFilterNew = f;
+  document.querySelectorAll('#roles-setup .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderRolesGridNew();
+}
+
+function renderRolesGridNew() {
+  const el = document.getElementById('rolesGridNew');
+  if(!el) return;
+  let roles = ROLES.filter(r => r.id !== 'loup_garou');
+  if(currentRoleFilterNew !== 'all') roles = roles.filter(r => r.team === currentRoleFilterNew);
+
+  el.innerHTML = roles.map(r => {
+    const cnt = state.selectedRoles[r.id] || 0;
+    const isSelected = cnt > 0;
+    let selClass = '';
+    if(isSelected) selClass = r.team==='wolf'?'selected-wolf':r.team==='solo'?'selected-solo':'selected-village';
+    let cntClass = r.team==='wolf'?'wolf':r.team==='solo'?'solo':'village';
+    return `<div class="role-card ${selClass}" onclick="toggleRoleNew('${r.id}')">
+      ${cnt > 0 ? `<div class="role-count ${cntClass}">${cnt}</div>` : ''}
+      <div class="role-header">
+        <span class="role-emoji">${r.emoji}</span>
+        <div>
+          <div class="role-name">${r.name}</div>
+          <div class="role-team">${r.teamLabel}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Wolves card (always shown when filter is all or wolf)
+  if(currentRoleFilterNew === 'all' || currentRoleFilterNew === 'wolf') {
+    const wc = state.selectedRoles['loup_garou'] || 0;
+    const loupCard = `<div class="role-card ${wc>0?'selected-wolf':''}" style="grid-column:span 2">
+      <div class="role-header">
+        <span class="role-emoji">🐺</span>
+        <div><div class="role-name">ذياب عاديين</div><div class="role-team">عدد الذياب العاديين</div></div>
+      </div>
+      <div class="count-controls">
+        <button class="cnt-btn" onclick="event.stopPropagation();changeWolfCountNew(-1)">−</button>
+        <span class="cnt-num">${wc}</span>
+        <button class="cnt-btn" onclick="event.stopPropagation();changeWolfCountNew(1)">+</button>
+        <span style="font-size:0.75em;color:var(--text2);margin-right:auto">ذيب عادي</span>
+      </div>
+    </div>`;
+    el.innerHTML = loupCard + el.innerHTML;
+  }
+
+  updateRolesSetupHeader();
+  updateStartBtnNew();
+}
+
+function changeWolfCountNew(delta) {
+  const cur = state.selectedRoles['loup_garou'] || 0;
+  state.selectedRoles['loup_garou'] = Math.max(0, cur + delta);
+  renderRolesGridNew();
+}
+
+function toggleRoleNew(id) {
+  const cur = state.selectedRoles[id] || 0;
+  state.selectedRoles[id] = cur > 0 ? 0 : 1;
+  renderRolesGridNew();
+}
+
+function updateRolesSetupHeader() {
+  const el = document.getElementById('rolesSetupHeader');
+  if(!el) return;
+  const total = state.players.length;
+  const specialRoles = Object.values(state.selectedRoles).reduce((a,b)=>a+b,0);
+  const remaining = total - specialRoles;
+  el.innerHTML = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <div style="text-align:center">
+      <div style="font-size:1.4em;font-weight:900">${total}</div>
+      <div style="font-size:0.72em;color:var(--text2)">لاعبين</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:1.4em;font-weight:900;color:#f39c12">${specialRoles}</div>
+      <div style="font-size:0.72em;color:var(--text2)">أدوار خاصة</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:1.4em;font-weight:900;color:${remaining<0?'#e74c3c':remaining===0?'#f39c12':'#5dcc85'}">${Math.max(0,remaining)}</div>
+      <div style="font-size:0.72em;color:var(--text2)">${remaining<0?'⚠️ زيادة':'قرويين عاديين'}</div>
+    </div>
+  </div>`;
+
+  // Overflow resolver
+  const ovEl = document.getElementById('overflowResolver');
+  if(!ovEl) return;
+  if(remaining < 0) {
+    const excess = Math.abs(remaining);
+    const curVillage = state.selectedRoles['villageois_extra'] || 0;
+    const curWolf = state.selectedRoles['loup_garou_extra'] || 0;
+    ovEl.style.display = 'block';
+    ovEl.innerHTML = `<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:var(--radius);padding:12px;">
+      <div style="font-size:0.85em;font-weight:700;color:#e74c3c;margin-bottom:8px">⚠️ الأدوار الخاصة أكثر من اللاعبين بـ ${excess}!</div>
+      <div style="font-size:0.82em;color:var(--text2);margin-bottom:10px">الراوي يختار: يزيد قرويين عاديين أو ذياب عاديين؟</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="addExtraVillagers()" style="flex:1;background:rgba(39,174,96,0.2);border:1px solid rgba(39,174,96,0.5);color:#5dcc85;border-radius:10px;padding:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.85em">
+          🏡 أضف ${excess} قروي عادي
+        </button>
+        <button onclick="addExtraWolves()" style="flex:1;background:rgba(142,68,173,0.2);border:1px solid rgba(142,68,173,0.5);color:#b980e0;border-radius:10px;padding:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.85em">
+          🐺 أضف ${excess} ذيب عادي
+        </button>
+      </div>
+    </div>`;
+  } else {
+    ovEl.style.display = 'none';
+  }
+}
+
+function addExtraVillagers() {
+  // Just reduce special roles — notify user to deselect
+  toast('اختار أقل أدوار خاصة أو زيد عدد اللاعبين!');
+}
+
+function addExtraWolves() {
+  // Increase wolf count to cover the gap
+  const total = state.players.length;
+  const specialRoles = Object.values(state.selectedRoles).reduce((a,b)=>a+b,0);
+  const excess = specialRoles - total;
+  if(excess > 0) {
+    state.selectedRoles['loup_garou'] = (state.selectedRoles['loup_garou'] || 0) + excess;
+    renderRolesGridNew();
+    toast(`🐺 تمت إضافة ${excess} ذيب عادي`);
+  }
+}
+
+function updateStartBtnNew() {
+  const total = state.players.length;
+  const specialRoles = Object.values(state.selectedRoles).reduce((a,b)=>a+b,0);
+  const remaining = total - specialRoles;
+  const btn = document.getElementById('startBtnNew');
+  if(!btn) return;
+
+  const summEl = document.getElementById('setupSummaryNew');
+  if(summEl) {
+    summEl.innerHTML = `<div class="${remaining<0?'warning-box':'info-box'}">
+      👥 لاعبين: <strong>${total}</strong> &nbsp;|&nbsp;
+      🎭 أدوار خاصة: <strong>${specialRoles}</strong> &nbsp;|&nbsp;
+      🏡 قرويين عاديين: <strong>${Math.max(0,remaining)}</strong>
+      ${remaining < 0 ? '<br><span style="color:var(--danger)">⚠️ الأدوار أكثر من اللاعبين!</span>' : ''}
+    </div>`;
+  }
+
+  btn.disabled = total < 5 || remaining < 0;
+}
+
+function toast(msg, dur=2500) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), dur);
+}
+
+function showModal(title, content, actions) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  const actDiv = document.getElementById('modalActions');
+  actDiv.innerHTML = '';
+  (actions||[]).forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + (a.btnClass||'btn-secondary');
+    btn.textContent = a.label;
+    btn.onclick = () => { closeModal(); a.fn && a.fn(); };
+    actDiv.appendChild(btn);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if(e.target === this) closeModal();
+});
+
+function getRoleById(id) { return ROLES.find(r => r.id === id); }
+function getPlayerRole(name) { return state.assignedRoles[name]; }
+function isAlive(name) { return !state.dead[name]; }
+function alivePlayers() { return state.players.filter(p => isAlive(p)); }
+function aliveWolves() { return alivePlayers().filter(p => isWolf(p)); }
+function aliveVillage() { return alivePlayers().filter(p => !isWolf(p) && !isSolo(p)); }
+function isWolf(p) {
+  const r = getPlayerRole(p);
+  const role = getRoleById(r);
+  if(!role) return false;
+  if(role.team === 'wolf') return true;
+  if(r === 'enfant_sauvage' && state.enfantBecameWolf) return true;
+  if(isInfected(p)) return true; // secretly infected
+  return false;
+}
+function isSolo(p) {
+  const r = getPlayerRole(p);
+  const role = getRoleById(r);
+  return role && role.team === 'solo' && r !== 'enfant_sauvage';
+}
+
+function teamColor(team) {
+  if(team==='wolf') return 'wolf-highlight';
+  if(team==='village') return 'village-highlight';
+  return 'highlight';
+}
+
+function log(msg, type) {
+  state.eventLog.push({ msg, type: type||'info', night: state.night, phase: state.phase });
+}
+
+function killPlayer(name, reason) {
+  if(state.dead[name]) return;
+  state.dead[name] = true;
+  log(`مات ${name}${reason?' ('+reason+')':''}`, 'death');
+
+  // Lovers
+  if(state.lovers.includes(name)) {
+    const partner = state.lovers.find(l=>l!==name);
+    if(partner && !state.dead[partner]) {
+      state.dead[partner] = true;
+      log(`مات ${partner} من الحزن (حبيب/ة)`, 'death');
+    }
+  }
+
+  // Chasseur
+  const role = getPlayerRole(name);
+  if(role === 'chasseur') {
+    setTimeout(() => triggerChasseur(name), 300);
+  }
+
+  // Servant
+  const hasServant = Object.entries(state.assignedRoles).find(([p,r])=>r==='servant'&&isAlive(p));
+  if(hasServant && hasServant[0] !== name) {
+    state.servantCanTake = { deadPlayer: name, deadRole: role };
+    setTimeout(() => triggerServant(hasServant[0], name, role), 400);
+  }
+
+  // Ancien died by vote
+  if(role === 'ancien' && !state.ancienDead) {
+    state.ancienDead = true;
+  }
+
+  // Enfant sauvage — if parent dies during day, enfant becomes wolf next night
+  if(state.phase === 'day' && !state.enfantBecameWolf && state.enfantSauvageParent === name) {
+    const enfant = Object.entries(state.assignedRoles).find(([p,r])=>r==='enfant_sauvage'&&isAlive(p));
+    if(enfant) {
+      state.enfantBecameWolf = true;
+      log(`${enfant[0]} أصبح ذيباً بعد مقتل قدوته ${name} نهاراً`, 'info');
+      toast(`🧒🐺 ${enfant[0]} ولى ذيب — مات قدوته ${name}!`);
+    }
+  }
+
+  checkWin();
+}
+
+function triggerChasseur(name) {
+  const alive = alivePlayers().filter(p=>p!==name);
+  if(alive.length === 0) return;
+  let opts = alive.map(p=>`<div class="infect-opt" onclick="chasseurKill('${p}')">${p}</div>`).join('');
+  showModal('🔫 الصياد مات!', `<p style="margin-bottom:12px;color:var(--text2)">الصياد ${name} يختار شكون يقتل معاه</p><div class="infect-options">${opts}</div>`, []);
+}
+
+function chasseurKill(target) {
+  closeModal();
+  killPlayer(target, 'قتله الصياد');
+  toast(`💥 ${target} قتله الصياد!`);
+  updateGameUI();
+}
+
+function triggerServant(servant, deadPlayer, deadRole) {
+  const role = getRoleById(deadRole);
+  if(!role) return;
+  showModal('🤵 الخادم يختار',
+    `<p style="margin-bottom:12px;color:var(--text2)">مات شخص بدور ${role.emoji} ${role.name}. الخادم ${servant} يقدر ياخذ دوره.</p>`,
+    [
+      { label: 'آه، ياخذ الدور', btnClass: 'btn-primary', fn: () => {
+        state.assignedRoles[servant] = deadRole;
+        log(`الخادم ${servant} أخذ دور ${role.name}`, 'info');
+        toast(`🤵 الخادم أخذ دور ${role.name}!`);
+        updateGameUI();
+      }},
+      { label: 'لا يبقى خادم', btnClass: 'btn-ghost', fn: () => {} }
+    ]
+  );
+}
+
+function checkWin() {
+  const wolves = aliveWolves().length;
+  const villagers = aliveVillage().length;
+  const elianEntry = Object.entries(state.assignedRoles).find(([p,r]) => r === 'elian');
+  const elianAlive = elianEntry && isAlive(elianEntry[0]);
+  const total = alivePlayers().length;
+
+  if(total === 0) { endGame('village', '🏡 فازت القرية!', 'ما بقاش أحد!'); return; }
+
+  // ما دام إليان حي — ما يربح حتى فريق، اللعبة تكمل دائماً
+  if(elianAlive) return;
+
+  // إليان مات — شروط عادية
+
+  // إليان يربح: بقى وحده (بعد ما مات)  — ما ينفعش لأنه مات، هذا ما يصيرش
+  // لكن إذا ماتوا الكل وإليان آخر واحد مات — ما بقاش حد
+  // (هذا يتحكم فيه total === 0 أعلاه)
+
+  // الذياب يربحوا: ذياب >= قرويين
+  if(wolves > 0 && wolves >= villagers) {
+    endGame('wolf', '🐺 فاز الذياب!', wolves === villagers ? 'الذياب ساووا القرويين!' : 'ما بقاش قرويين!'); return;
+  }
+
+  // القرويين يربحوا: كل الذياب ماتوا
+  if(wolves === 0 && villagers > 0) {
+    endGame('village', '🏡 فازت القرية!', 'كل الذياب ماتوا!'); return;
+  }
+
+  if(total === 0) { endGame('village', '🏡 فازت القرية!', 'ما بقاش أحد!'); return; }
+}
+
+function endGame(winner, title, sub) {
+  document.getElementById('endTrophy').textContent = winner==='wolf'?'🐺':winner==='solo'?'🎯':'🏡';
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endSubtitle').textContent = sub;
+  showScreen('end');
+}
+
+// =============================================
+// HOME / SETUP
+// =============================================
+function addPlayer() {
+  const input = document.getElementById('playerInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.players.includes(name)) { toast('هذا الاسم موجود!'); return; }
+  state.players.push(name);
+  input.value = '';
+  savePlayers();
+  renderPlayersList();
+  updateStartBtn();
+}
+
+function savePlayers() {
+  try { localStorage.setItem('lgPlayers', JSON.stringify(state.players)); } catch(e) {}
+}
+
+function loadPlayers() {
+  try {
+    const saved = localStorage.getItem('lgPlayers');
+    if(saved) {
+      const arr = JSON.parse(saved);
+      if(Array.isArray(arr) && arr.length > 0) {
+        state.players = arr;
+        renderPlayersList();
+        updateStartBtn();
+      }
+    }
+  } catch(e) {}
+}
+
+function removePlayer(name) {
+  state.players = state.players.filter(p=>p!==name);
+  savePlayers();
+  renderPlayersList();
+  updateStartBtn();
+}
+
+function clearAllPlayers() {
+  if(state.players.length === 0) return;
+  if(!confirm('تمسح كل الأسماء؟')) return;
+  state.players = [];
+  savePlayers();
+  renderPlayersList();
+  updateStartBtn();
+}
+
+function renderPlayersList() {
+  const el = document.getElementById('playersList');
+  if(state.players.length === 0) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:0.85em;margin-bottom:8px">ما زاد لاعبين — أضف على الأقل 6</p>';
+    return;
+  }
+  el.innerHTML = state.players.map((p, i) => `
+    <div class="player-chip" draggable="true" data-idx="${i}" 
+         ondragstart="dragStart(event,${i})" ondragover="dragOver(event)" ondrop="dropPlayer(event,${i})"
+         style="cursor:grab">
+      <span style="color:var(--text2);font-size:0.8em;min-width:18px">${i+1}.</span>
+      <span style="margin-left:4px">👤 ${p}</span>
+      <button class="chip-remove" onclick="removePlayer('${p}')">✕</button>
+    </div>
+  `).join('');
+}
+
+let dragSrcIdx = null;
+function dragStart(e, idx) { dragSrcIdx = idx; e.dataTransfer.effectAllowed = 'move'; }
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dropPlayer(e, targetIdx) {
+  e.preventDefault();
+  if(dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+  const arr = [...state.players];
+  const [moved] = arr.splice(dragSrcIdx, 1);
+  arr.splice(targetIdx, 0, moved);
+  state.players = arr;
+  dragSrcIdx = null;
+  savePlayers();
+  renderPlayersList();
+  updateStartBtn();
+}
+
+let currentRoleFilter = 'all';
+function filterRoles(f, el) {
+  currentRoleFilter = f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderRolesGrid();
+}
+
+function renderRolesGrid() {
+  const el = document.getElementById('rolesGrid');
+  let roles = ROLES.filter(r => r.id !== 'loup_garou'); // loup garou handled separately
+  if(currentRoleFilter !== 'all') roles = roles.filter(r=>r.team===currentRoleFilter);
+  
+  el.innerHTML = roles.map(r => {
+    const cnt = state.selectedRoles[r.id] || 0;
+    const isSelected = cnt > 0;
+    let selClass = '';
+    if(isSelected) selClass = r.team==='wolf'?'selected-wolf':r.team==='solo'?'selected-solo':'selected-village';
+    let cntClass = r.team==='wolf'?'wolf':r.team==='solo'?'solo':'village';
+    
+    return `<div class="role-card ${selClass}" onclick="toggleRole('${r.id}')">
+      ${cnt > 0 ? `<div class="role-count ${cntClass}">${cnt}</div>` : ''}
+      <div class="role-header">
+        <span class="role-emoji">${r.emoji}</span>
+        <div>
+          <div class="role-name">${r.name}</div>
+          <div class="role-team">${r.teamLabel}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Add wolves count control at top if wolf filter or all
+  const loupCard = `<div class="role-card ${(state.selectedRoles['loup_garou']||0)>0?'selected-wolf':''}" style="grid-column:span 2">
+    <div class="role-header">
+      <span class="role-emoji">🐺</span>
+      <div>
+        <div class="role-name">ذياب عاديين</div>
+        <div class="role-team">عدد الذياب العاديين</div>
+      </div>
+    </div>
+    <div class="count-controls">
+      <button class="cnt-btn" onclick="event.stopPropagation();changeWolfCount(-1)">−</button>
+      <span class="cnt-num">${state.selectedRoles['loup_garou']||0}</span>
+      <button class="cnt-btn" onclick="event.stopPropagation();changeWolfCount(1)">+</button>
+      <span style="font-size:0.75em;color:var(--text2);margin-right:auto">ذيب عادي</span>
+    </div>
+  </div>`;
+
+  if(currentRoleFilter==='all'||currentRoleFilter==='wolf') {
+    el.innerHTML = loupCard + el.innerHTML;
+  }
+
+  updateSetupSummary();
+}
+
+function changeWolfCount(delta) {
+  const cur = state.selectedRoles['loup_garou'] || 0;
+  const next = Math.max(0, cur+delta);
+  state.selectedRoles['loup_garou'] = next;
+  renderRolesGrid();
+  updateStartBtn();
+}
+
+function toggleRole(id) {
+  const cur = state.selectedRoles[id] || 0;
+  state.selectedRoles[id] = cur > 0 ? 0 : 1;
+  renderRolesGrid();
+  updateStartBtn();
+}
+
+function updateSetupSummary() {
+  const el = document.getElementById('setupSummary');
+  const totalPlayers = state.players.length;
+  const totalRoles = Object.values(state.selectedRoles).reduce((a,b)=>a+b,0);
+  const remaining = totalPlayers - totalRoles;
+  if(totalPlayers === 0) { el.innerHTML=''; return; }
+  el.innerHTML = `<div class="info-box">
+    👥 لاعبين: ${totalPlayers} | 🎭 أدوار: ${totalRoles} | 🏡 قرويين عاديين: ${Math.max(0,remaining)}
+    ${remaining < 0 ? '<br><span style="color:var(--danger)">⚠️ الأدوار أكثر من اللاعبين!</span>' : ''}
+  </div>`;
+}
+
+function updateStartBtn() {
+  const totalPlayers = state.players.length;
+  const totalRoles = Object.values(state.selectedRoles).reduce((a,b)=>a+b,0);
+  const btn = document.getElementById('startBtn');
+  btn.disabled = totalPlayers < 6 || totalRoles > totalPlayers;
+}
+
+// =============================================
+// ROLES INFO SCREEN
+// =============================================
+function renderRolesInfo() {
+  const el = document.getElementById('rolesInfoContent');
+  const groups = [
+    { label: '🐺 فريق الذياب', team: 'wolf', color: 'wolf-highlight' },
+    { label: '🏡 فريق القرية', team: 'village', color: 'village-highlight' },
+    { label: '🎯 لاعبون منفردون', team: 'solo', color: 'highlight' },
+  ];
+  el.innerHTML = groups.map(g => {
+    const roles = ROLES.filter(r=>r.team===g.team);
+    return `<div class="section-title" style="color:inherit"><span class="${g.color}">${g.label}</span></div>` +
+      roles.map(r => `<div class="role-info-card">
+        <div class="ri-header">
+          <span class="ri-emoji">${r.emoji}</span>
+          <div>
+            <div class="ri-name">${r.name}</div>
+            <div class="ri-team ${g.color}">${r.teamLabel}</div>
+          </div>
+        </div>
+        <div class="ri-desc">${r.desc}</div>
+      </div>`).join('');
+  }).join('');
+}
+
+// =============================================
+// START GAME / DISTRIBUTE
+// =============================================
+function startGame() {
+  if(state.players.length < 5) { toast('محتاج 5 لاعبين على الأقل!'); return; }
+  
+  // Assign roles
+  let rolePool = [];
+  Object.entries(state.selectedRoles).forEach(([id, cnt]) => {
+    for(let i=0; i<cnt; i++) rolePool.push(id);
+  });
+  
+  // Fill with villagers
+  while(rolePool.length < state.players.length) rolePool.push('villageois');
+  
+  // Shuffle
+  const shuffled = [...state.players].sort(()=>Math.random()-0.5);
+  const shuffledRoles = rolePool.sort(()=>Math.random()-0.5);
+  
+  state.assignedRoles = {};
+  shuffled.forEach((p,i) => { state.assignedRoles[p] = shuffledRoles[i]; });
+  
+  // Reset state
+  // Full state reset — prevents data bleed between games
+  state.dead = {};
+  state.night = 1;
+  state.phase = 'night';
+  state.nightStepIndex = 0;
+  state.activeNightSteps = [];
+  state.eventLog = [];
+  state.lovers = [];
+  state.infectUsed = false;
+  state.infectPubliclyUsed = false;
+  state.infectedPlayers = [];
+  state.ancienDead = false;
+  state.ancienVillageRolesDropped = false;
+  state.ancienVillageRolesDropped_shown = false;
+  state.witchSaveUsed = false;
+  state.witchKillUsed = false;
+  state.witchKillTarget = null;
+  state.shepherdSheep = 2;
+  state.votes = {};
+  state.corbeauTarget = null;
+  state.puteTarget = null;
+  state.silenced = null;
+  state.lupNoirSilenced = null;
+  state.enfantSauvageParent = null;
+  state.enfantBecameWolf = false;
+  state.servantCanTake = null;
+  state.protectedTarget = null;
+  state.lastProtectedTarget = null;
+  state.nightKillTarget = null;
+  state.nightSaveTarget = null;
+  state.distributeIndex = 0;
+  state.voyanteSawPlayer = null;
+  state.voyanteSawRole = null;
+  state.lupRougeSawPlayer = null;
+  state.lupRougeSawRole = null;
+  state.bergerActions = [];
+  state.oursGrowled = null;
+  state.ancienStartSide = null;
+  state.ancienStartPlayer = null;
+  showScreen('distribute');
+  renderDistribute();
+}
+
+function renderDistribute() {
+  const i = state.distributeIndex;
+  const content = document.getElementById('distributeContent');
+  const btn = document.getElementById('distributeNextBtn');
+  
+  if(i >= state.players.length) {
+    content.innerHTML = `<div class="player-card-role">
+      <div class="role-big-emoji">🌙</div>
+      <div class="role-big-name">الكل شاف دوره!</div>
+      <div class="role-big-team" style="color:var(--text2)">جاهزين تبدأو اللعبة</div>
+    </div>`;
+    btn.textContent = '🎮 ابدأ اللعبة!';
+    btn.onclick = beginGame;
+    return;
+  }
+  
+  const player = state.players[i];
+  // Show player name, ask them to confirm
+  content.innerHTML = `<div class="player-card-role">
+    <div class="role-big-emoji">👤</div>
+    <div class="role-big-name">${player}</div>
+    <div class="role-big-team" style="color:var(--text2)">دورك</div>
+  </div>
+  <div class="info-box" style="text-align:center">اضغط "شوف دورك" وتأكد ما كان حد يشوف غيرك 🤫</div>`;
+  btn.textContent = '👁️ شوف دورك';
+  btn.onclick = revealRole;
+}
+
+function revealRole() {
+  const i = state.distributeIndex;
+  const player = state.players[i];
+  const roleId = state.assignedRoles[player];
+  
+  if(roleId === 'villageois') {
+    showModal(`👤 ${player}`, `<div class="player-card-role">
+      <div class="role-big-emoji">🏡</div>
+      <div class="role-big-name">قروي عادي</div>
+      <div class="role-big-team village-highlight">فريق القرية</div>
+    </div>
+    <div class="ri-desc" style="text-align:center;margin-top:8px">ما عندكش دور خاص. صوّت وناقش تحاول تكشف الذياب!</div>`,
+    [{ label: 'فهمت! 👍', btnClass: 'btn-primary', fn: nextDistribute }]);
+  } else {
+    const role = getRoleById(roleId);
+    if(!role) { nextDistribute(); return; }
+    const tcls = role.team==='wolf'?'wolf-highlight':role.team==='solo'?'highlight':'village-highlight';
+    showModal(`👤 ${player}`, `<div class="player-card-role">
+      <div class="role-big-emoji">${role.emoji}</div>
+      <div class="role-big-name">${role.name}</div>
+      <div class="role-big-team ${tcls}">${role.teamLabel}</div>
+    </div>
+    <div class="ri-desc" style="margin-top:8px">${role.desc}</div>`,
+    [{ label: 'فهمت! 👍', btnClass: 'btn-primary', fn: nextDistribute }]);
+  }
+}
+
+function nextDistribute() {
+  state.distributeIndex++;
+  renderDistribute();
+}
+
+function distributeNext() {} // overridden dynamically
+
+function beginGame() {
+  buildNightSteps();
+  showScreen('game');
+  updateGameUI();
+  renderNightStep();
+  gameTab('night', document.querySelector('.tab'));
+}
+
+// =============================================
+// NIGHT STEPS
+// =============================================
+function buildNightSteps() {
+  state.activeNightSteps = [];
+  
+  // Bear check first
+  const bearPlayer = Object.entries(state.assignedRoles).find(([p,r])=>r==='ours'&&isAlive(p));
+  if(bearPlayer) {
+    state.activeNightSteps.push({ type: 'ours', player: bearPlayer[0] });
+  }
+
+  NIGHT_ORDER.forEach(roleId => {
+    // Handle special signal roles (elian and barbier signal at night, act in day)
+    if(roleId === 'elian_signal') {
+      const player = Object.entries(state.assignedRoles).find(([p,r])=>r==='elian'&&isAlive(p));
+      if(player) state.activeNightSteps.push({ type: 'elian_signal', player: player[0] });
+      return;
+    }
+    if(roleId === 'barbier_signal') {
+      const player = Object.entries(state.assignedRoles).find(([p,r])=>r==='barbier'&&isAlive(p));
+      if(player) state.activeNightSteps.push({ type: 'barbier_signal', player: player[0] });
+      return;
+    }
+
+    // Skip first-night only roles on subsequent nights
+    const roleDef = getRoleById(roleId);
+    if(roleDef && roleDef.firstNightOnly && state.night > 1) return;
+    
+    const player = Object.entries(state.assignedRoles).find(([p,r])=>r===roleId&&isAlive(p));
+    if(!player) return;
+    if(!roleDef || !roleDef.nightAction) return;
+    
+    // enfant sauvage first night only
+    if(roleId==='enfant_sauvage' && state.night > 1) return;
+    
+    state.activeNightSteps.push({ type: roleId, player: player[0] });
+  });
+
+  // Wolves vote step — include enfant sauvage if they became wolf
+  const wolves = aliveWolves();
+  if(wolves.length > 0) {
+    const mainStepIdx = state.activeNightSteps.findIndex(s=>s.type==='loup_garou'||s.type==='loup_infect'||s.type==='loup_rouge'||s.type==='loup_noir');
+    if(mainStepIdx >= 0) {
+      state.activeNightSteps.splice(mainStepIdx, 0, { type: 'wolf_vote', player: null });
+    } else {
+      state.activeNightSteps.unshift({ type: 'wolf_vote', player: null });
+    }
+  }
+
+  state.nightStepIndex = 0;
+  state.nightKillTarget = null;
+  state.nightSaveTarget = null;
+  // Reset night report tracking
+  state.voyanteSawPlayer = null;
+  state.voyanteSawRole = null;
+  state.lupRougeSawPlayer = null;
+  state.lupRougeSawRole = null;
+  state.bergerActions = [];
+  state.oursGrowled = null;
+  state.ancienStartSide = null;
+  state.ancienStartPlayer = null; // choose who starts parole
+  const ancienPlayer2 = Object.entries(state.assignedRoles).find(([p,r])=>r==='ancien'&&isAlive(p));
+  if(ancienPlayer2) {
+    state.activeNightSteps.push({ type: 'ancien_start', player: ancienPlayer2[0] });
+  }
+}
+
+function renderNightStep() {
+  const el = document.getElementById('nightContent');
+  const nextBtn = document.getElementById('nightNextBtn');
+  const startDayBtn = document.getElementById('startDayBtn');
+
+  if(state.nightStepIndex >= state.activeNightSteps.length) {
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🌙 انتهى الليل</div>
+      <div class="step-instruction">اضغط "ابدأ النهار" تشوف من مات الليلة</div>
+    </div>`;
+    nextBtn.style.display = 'none';
+    startDayBtn.style.display = 'flex';
+    return;
+  }
+
+  // Always reset button handler
+  nextBtn.onclick = nextNightStep;
+  nextBtn.style.display = 'flex';
+  startDayBtn.style.display = 'none';
+
+  const step = state.activeNightSteps[state.nightStepIndex];
+  // Steps with their own confirm buttons — hide next
+  if(step.type === 'wolf_vote' || step.type === 'protecteur') {
+    nextBtn.style.display = 'none';
+  }
+  renderStep(step, el);
+}
+
+function renderStep(step, el) {
+  const alivePList = alivePlayers().map(p=>`<div class="infect-opt" onclick="selectNightTarget('${p}','${step.type}')">${p}</div>`).join('');
+  
+  if(step.type === 'wolf_vote') {
+    const realWolves = aliveWolves().filter(p => { const r = getPlayerRole(p); const role = getRoleById(r); return role && role.team === 'wolf'; });
+    const enfantWolves = aliveWolves().filter(p => getPlayerRole(p)==='enfant_sauvage' && state.enfantBecameWolf);
+    const infectedWolves = aliveWolves().filter(p => isInfected(p));
+    const wolvesInfo = realWolves.map(p=>{ const r = getRoleById(getPlayerRole(p)); return `<span style="color:#b980e0">${r?r.emoji:''} ${p}</span>`; }).join('، ');
+    const enfantInfo = enfantWolves.length > 0
+      ? `<br><span style="color:#e67e22;font-size:0.85em">🧒🐺 الطفل البري: ${enfantWolves.map(p=>p).join('، ')} (وُلّي ذيب!)</span>`
+      : '';
+    const infectedInfo = infectedWolves.length > 0
+      ? `<br><span style="color:#ff9800;font-size:0.85em">🤫 مُعدى سراً: ${infectedWolves.map(p=>{ const r = getRoleById(getPlayerRole(p)); return `${r?r.emoji:''} ${p} (${r?r.name:'قروي'})`; }).join('، ')}</span>`
+      : '';
+    const nonWolves = alivePlayers().filter(p=>!isWolf(p));
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🐺 الذياب يقومو</div>
+      <div class="step-instruction">الذياب: ${wolvesInfo}${enfantInfo}${infectedInfo}<br>يتفاهمو بالإشارة شكون يقتلو</div>
+    </div>
+    <div class="section-title">اختار الضحية</div>
+    <div class="infect-options">${nonWolves.map(p=>`<div class="infect-opt ${state.nightKillTarget===p?'chosen-kill':''}" onclick="setNightKill('${p}')">${state.nightKillTarget===p?'🎯 ':''} ${p}</div>`).join('')}</div>
+    ${state.nightKillTarget ? '<button class="btn btn-primary" style="margin-top:10px" onclick="confirmWolfKill()">✅ تأكيد — ' + state.nightKillTarget + '</button>' : '<div class="info-box" style="margin-top:8px">اختار ضحية باش تقدر تكمل</div>'}` ;
+  }
+  else if(step.type === 'loup_infect') {
+    const infectAvailable = !state.infectUsed;
+    el.innerHTML = `<div class="active-step-card" style="border-color:rgba(142,68,173,0.5)">
+      <div class="step-title">☣️ الذيب المُعدي — ${step.player}</div>
+      <div class="step-instruction">
+        ${infectAvailable
+          ? `يقوم مع الذياب. بعد القتل يقدر يقترح يجيب الضحية معاهم — الضحية تبقى بدورها الأصلي ظاهرياً!<br>
+             <span style="font-size:0.82em;color:var(--text2)">الكرتوشة: <strong style="color:#5dcc85">✅ ما استعملهاش بعد</strong></span>`
+          : `يقوم مع الذياب. <strong style="color:#ff9080">الكرتوشة مستعملة</strong> — يتصرف كذيب عادي.<br>
+             <span style="font-size:0.82em;color:var(--text2)">⚠️ للتمويه: يقعد يقوم بدوره بالليل كأنو ما استعملهاش</span>`
+        }
+      </div>
+    </div>
+    <div class="action-grid">
+      ${infectAvailable
+        ? `<button class="action-btn wolf" onclick="infectVictim()">☣️ يجيب الضحية معاهم</button>
+           <button class="action-btn" onclick="infectSkip()">يستحفظ / يتجاوز</button>`
+        : `<button class="action-btn" style="grid-column:span 2;opacity:0.6" onclick="infectSkip()">✅ فاهمين — تالي</button>`
+      }
+    </div>`;
+  }
+  else if(step.type === 'loup_noir') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🖤 الذيب الأسود — ${step.player}</div>
+      <div class="step-instruction">يختار شخص ما يقدرش يتكلم في النقاش</div>
+    </div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="lupNoirSilence('${p}')">${p}</div>`).join('')}
+    <div class="infect-opt" style="opacity:0.5" onclick="lupNoirSkip()">يتجاوز</div></div>`;
+  }
+  else if(step.type === 'loup_rouge') {
+    const others = alivePlayers().filter(p=>p!==step.player&&!isWolf(p));
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🔴 الذيب الأحمر — ${step.player}</div>
+      <div class="step-instruction">يختار شخص يشوف دوره الحقيقي (حتى القرويين)</div>
+    </div>
+    <div class="section-title">اختار شكون يشوف دوره</div>
+    <div class="infect-options">${others.map(p=>'<div class="infect-opt" onclick="lupRougeReveal(\''+p+'\')">'+p+'</div>').join('')}</div>
+    <button class="action-btn" style="margin-top:8px;width:100%;opacity:0.6" onclick="nextNightStep()">يتجاوز</button>`;   }
+  else if(step.type === 'voyante') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🔮 العرّافة — ${step.player}</div>
+      <div class="step-instruction">تختار شخص وترى دوره الحقيقي</div>
+    </div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="voyanteSee('${p}')">${p}</div>`).join('')}</div>`;
+  }
+  else if(step.type === 'sorciere') {
+    // If protecteur saved the wolf target, witch sees nothing died
+    const protected_ = state.protectedTarget; // already saved to lastProtected in confirmProtect, still in protectedTarget until startDay
+    const killed = state.nightKillTarget;
+    // Ancien with first life — show nothing to witch too
+    const killedRole = killed ? getPlayerRole(killed) : null;
+    const ancienAlive = killedRole === 'ancien' && !state.ancienDead;
+    // If protected or ancien survived — witch sees no victim
+    const witchSeesVictim = killed && !ancienAlive && killed !== state.protectedTarget;
+    const displayKilled = witchSeesVictim ? killed : null;
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🧙 الساحرة — ${step.player}</div>
+      <div class="step-instruction">
+        ${displayKilled ? `الذياب قتلو: <strong>${displayKilled}</strong>` : '<span style="color:#5dcc85">ما شاتش حد مات الليلة</span>'}<br>
+        <span style="font-size:0.85em;color:var(--text2)">(الراوي يشير للشخص أو يقول ما فماش)</span><br><br>
+        💊 دواء الإنقاذ: ${state.witchSaveUsed?'❌ مستعمل':'✅ متاح'}<br>
+        🧪 السم: ${state.witchKillUsed?'❌ مستعمل':'✅ متاح'}
+      </div>
+    </div>
+    <div class="action-grid">
+      ${!state.witchSaveUsed && displayKilled ? `<button class="action-btn success" onclick="witchSave()">💊 تنقذ ${displayKilled}</button>` : '<button class="action-btn" disabled style="opacity:0.4">💊 ما تنجمش تنقذ</button>'}
+      ${!state.witchKillUsed ? `<button class="action-btn danger" onclick="showWitchKill()">🧪 تقتل شخص</button>` : '<button class="action-btn" disabled style="opacity:0.4">🧪 سم مستعمل</button>'}
+      <button class="action-btn" onclick="witchSkip()" style="grid-column:span 2">تتجاوز</button>
+    </div>`;
+  }
+  else if(step.type === 'cupidon') {
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">💘 كيوبيد — ${step.player} (الليلة الأولى)</div>
+      <div class="step-instruction">يختار زوج ناس يربطهم بالحب. إذا مات واحد يموت الآخر.</div>
+    </div>
+    <div class="section-title">اختار الأول</div>
+    <div id="cupidChoice1" class="infect-options">${alivePlayers().filter(p=>!state.lovers.includes(p)).map(p=>`<div class="infect-opt" onclick="cupidChoose1('${p}')">${p}</div>`).join('')}</div>`;
+  }
+  else if(step.type === 'pute') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">💋 اللعوبة — ${step.player}</div>
+      <div class="step-instruction">تختار مع من تنام الليلة. إذا قتلوها يموت اللي ختارته معاها.</div>
+    </div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="puteChoose('${p}')">${p}</div>`).join('')}
+    <div class="infect-opt" style="opacity:0.5" onclick="puteChoose(null)">تنام وحدها</div></div>`;
+  }
+  else if(step.type === 'corbeau') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🐦‍⬛ الغراب — ${step.player}</div>
+      <div class="step-instruction">يختار شخص يهزله زوز صوابع زيادة في التصويت</div>
+    </div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="corbeauChoose('${p}')">${p}</div>`).join('')}
+    <div class="infect-opt" style="opacity:0.5" onclick="corbeauChoose(null)">يتجاوز</div></div>`;
+  }
+  else if(step.type === 'berger') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    const sheepSentThisNight = state.bergerActions.length;
+    const canSendMore = state.shepherdSheep > 0 && sheepSentThisNight < 2;
+    const sentInfo = sheepSentThisNight > 0 ? `<br><span style="color:#f39c12">بعث ${sheepSentThisNight} خروف هذه الليلة.</span>` : '';
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🐑 الراعي — ${step.player}</div>
+      <div class="step-instruction">عنده ${state.shepherdSheep} خروف.${sentInfo}
+      <br><span style="font-size:0.82em;color:var(--text2)">إذا ذيب يخسر الخروف. إذا قروي يرجعله.</span></div>
+    </div>
+    ${canSendMore && others.length > 0 ? `
+    <div class="action-grid" style="margin-bottom:10px">
+      <button class="action-btn success" onclick="bergerChooseCount(1,'${step.player}')">🐑 يبعث خروف واحد</button>
+      ${state.shepherdSheep >= 2 && sheepSentThisNight === 0 ? `<button class="action-btn wolf" onclick="bergerChooseCount(2,'${step.player}')">🐑🐑 يبعث خروفين</button>` : '<div></div>'}
+    </div>` : '<div class="warning-box">ما بقاش خراف!</div>'}
+    <button class="action-btn" style="margin-top:8px;width:100%;opacity:0.7" onclick="nextNightStep()">يتجاوز${sheepSentThisNight>0?' (بعث '+sheepSentThisNight+')'  :''}</button>`;
+  }
+  else if(step.type === 'ours') {
+    const left = getNeighbor(step.player, -1);
+    const right = getNeighbor(step.player, 1);
+    const leftWolf = left && isWolf(left);
+    const rightWolf = right && isWolf(right);
+    const growls = leftWolf || rightWolf;
+    // Track for night report
+    state.oursGrowled = growls;
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🐻 الدب — ${step.player}</div>
+      <div class="step-instruction">
+        جاره اليسار: <strong>${left||'—'}</strong> ${leftWolf?'🐺':''}<br>
+        جاره اليمين: <strong>${right||'—'}</strong> ${rightWolf?'🐺':''}
+        ${growls?'<br><br>⚠️ الراوي يقول: <strong style="color:#b980e0">الدب يقرقر!</strong>':'<br><br>✅ الراوي يقول: <strong style="color:#5dcc85">الدب ما يقرقرش</strong>'}
+      </div>
+    </div>`;
+  }
+  else if(step.type === 'enfant_sauvage') {
+    const others = alivePlayers().filter(p=>p!==step.player);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🧒 الطفل البري — ${step.player} (الليلة الأولى)</div>
+      <div class="step-instruction">يختار شخص يتبعه. إذا مات هذا الشخص يولي مع الذياب.</div>
+    </div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="enfantChoose('${p}')">${p}</div>`).join('')}</div>`;
+  }
+  else if(step.type === 'protecteur') {
+    const others = alivePlayers().filter(p => p !== step.player || true); // can protect self but not twice in a row
+    const lastP = state.lastProtectedTarget;
+    const restricted = lastP === step.player ? [step.player, lastP] : [lastP];
+    const available = alivePlayers().filter(p => !restricted.includes(p) || restricted.indexOf(p) < 0);
+    // Actually: can't protect same person as last night
+    const avail2 = alivePlayers().filter(p => p !== lastP);
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🛡️ الحارس — ${step.player}</div>
+      <div class="step-instruction">يختار شخص يحميه الليلة من الذياب.<br>
+      ${lastP ? `❌ ما يقدرش يختار <strong>${lastP}</strong> (حماه بالأمس)` : 'الليلة الأولى — يختار أي شخص'}</div>
+    </div>
+    <div class="infect-options">${avail2.map(p=>`<div class="infect-opt ${state.protectedTarget===p?'chosen-protect':''}" onclick="protecteurChoose('${p}')">${state.protectedTarget===p?'🛡️ ':''} ${p}</div>`).join('')}
+    <div class="infect-opt" style="opacity:0.5" onclick="protecteurChoose(null)">ما يحمي حد</div></div>
+    ${state.protectedTarget ? `<button class="btn btn-primary" style="margin-top:10px" onclick="confirmProtect()">✅ تأكيد حماية ${state.protectedTarget}</button>` : ''}`;
+  }
+  else if(step.type === 'elian_signal') {
+    el.innerHTML = `<div class="active-step-card" style="border-color:rgba(255,152,0,0.5);background:linear-gradient(135deg,rgba(255,152,0,0.1),rgba(192,57,43,0.05))">
+      <div class="step-title">🎯 إليان — ${step.player}</div>
+      <div class="step-instruction">
+        إليان يقوم ويعطي <strong>إشارة للراوي</strong> باش يشير إنو يبغي يكشف دور شخص في النهار.<br><br>
+        <span style="color:#ff9800;font-weight:700;">⚠️ ما يكشفش دور هنا — الكشف يصير في النهار!</span><br>
+        <span style="font-size:0.82em;color:var(--text2)">الراوي يرقّد الكل ويفيّق إليان — إليان يشامي فقط ويرقد</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:8px" onclick="nextNightStep()">✅ إليان شامى — يرقد</button>`;
+  }
+  else if(step.type === 'barbier_signal') {
+    el.innerHTML = `<div class="active-step-card" style="border-color:rgba(0,188,212,0.5);background:linear-gradient(135deg,rgba(0,188,212,0.1),rgba(39,174,96,0.05))">
+      <div class="step-title">✂️ الحلاق — ${step.player}</div>
+      <div class="step-instruction">
+        الحلاق يقوم ويعطي <strong>إشارة للراوي</strong> باش يشير إنو يبغي يكشف دور ذيب في النهار.<br><br>
+        <span style="color:#00bcd4;font-weight:700;">⚠️ ما يكشفش دور هنا — الكشف يصير في النهار!</span><br>
+        <span style="font-size:0.82em;color:var(--text2)">الراوي يرقّد الكل ويفيّق الحلاق — الحلاق يشامي فقط ويرقد</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:8px" onclick="nextNightStep()">✅ الحلاق شامى — يرقد</button>`;
+  }
+  else if(step.type === 'ancien_start') {
+    const others = alivePlayers().filter(p => p !== step.player);
+    const chosen = state.ancienStartPlayer;
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">👴 الشيخ — ${step.player}</div>
+      <div class="step-instruction">يختار شكون يبدأ الكلام ومنين<br>
+        <span style="font-size:0.82em;color:var(--text2)">يختار شخص بالاسم + الجهة اللي يدور فيها النقاش</span>
+      </div>
+    </div>
+    ${!chosen ? `
+    <div class="section-title">1. شكون يبدأ الكلام؟</div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="ancienPickPlayer('${p}')">${p}</div>`).join('')}</div>
+    ` : `
+    <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);border-radius:10px;padding:10px;margin-bottom:12px;">
+      يبدأ من عند: <strong>${chosen}</strong>
+    </div>
+    <div class="section-title">2. من أي جهة يدور النقاش؟</div>
+    <div class="action-grid">
+      <button class="action-btn success" onclick="ancienChooseStart('${chosen}','يمين')">👉 يدور لليمين</button>
+      <button class="action-btn wolf" onclick="ancienChooseStart('${chosen}','يسار')">👈 يدور لليسار</button>
+    </div>
+    <button class="action-btn" style="width:100%;margin-top:8px;opacity:0.6" onclick="ancienPickPlayer(null)">← تغيير الشخص</button>
+    `}`;
+  }
+  else {
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">${step.type}</div>
+      <div class="step-instruction">هذا الدور جاهز. اضغط التالي.</div>
+    </div>`;
+  }
+}
+
+// Ancien start-of-parole selection
+function ancienPickPlayer(p) {
+  state.ancienStartPlayer = p;
+  // Re-render the step
+  renderStep(state.activeNightSteps[state.nightStepIndex], document.getElementById('nightContent'));
+}
+
+function ancienChooseStart(player, direction) {
+  state.ancienStartSide = `${player} — جهة ${direction}`;
+  state.ancienStartPlayer = null;
+  log(`الشيخ اختار: يبدأ من عند ${player} نحو ${direction}`, 'info');
+  toast(`👴 يبدأ النقاش من عند ${player} — ${direction === 'يمين' ? '👉' : '👈'} ${direction}`);
+  nextNightStep();
+}
+
+function getNeighbor(player, dir) {
+  const alive = alivePlayers();
+  const idx = alive.indexOf(player);
+  if(idx < 0) return null;
+  const ni = (idx + dir + alive.length) % alive.length;
+  return alive[ni];
+}
+
+// Night Actions
+function setNightKill(p) {
+  state.nightKillTarget = p;
+  renderNightStep();
+}
+
+function confirmWolfKill() {
+  if(!state.nightKillTarget) { toast('اختار ضحية أولاً!'); return; }
+  log(`الذياب اختاروا ${state.nightKillTarget}`, 'wolf');
+  nextNightStep();
+}
+
+function protecteurChoose(p) {
+  state.protectedTarget = p;
+  renderNightStep();
+}
+
+function confirmProtect() {
+  if(!state.protectedTarget) { nextNightStep(); return; }
+  log(`الحارس يحمي ${state.protectedTarget}`, 'info');
+  toast(`🛡️ ${state.protectedTarget} محمي الليلة`);
+  nextNightStep();
+}
+
+function infectVictim() {
+  if(!state.nightKillTarget) { toast('اختار ضحية أولاً!'); return; }
+  const victim = state.nightKillTarget;
+  const victimRole = getRoleById(getPlayerRole(victim));
+  // Mark as used BEFORE showing modal
+  state.infectUsed = true;
+  showModal(`☣️ الذيب المُعدي — السؤال للضحية`, `
+    <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:12px;margin-bottom:12px;font-size:0.88em;color:var(--text2);">
+      الراوي يوقّف اللعبة بهدوء ويسأل <strong>${victim}</strong> سراً — دون ما يعرف باقي اللاعبين<br>
+      <span style="color:#ff9800">⚠️ السؤال يصير في السر تماماً</span>
+    </div>
+    <div class="player-card-role">
+      <div class="role-big-emoji">${victimRole?victimRole.emoji:'🏡'}</div>
+      <div class="role-big-name">${victim}</div>
+      <div style="color:var(--text2);font-size:0.85em">دوره الأصلي: ${victimRole?victimRole.name:'قروي عادي'}</div>
+    </div>
+    <p style="color:var(--text2);margin-bottom:12px;font-size:0.9em;">الذيب المُعدي يقترح يضمّك للذياب — تبقى بدورك الأصلي ظاهرياً أمام الناس!</p>
+    <div class="infect-options">
+      <div class="infect-opt" onclick="infectJoin('${victim}')">🐺 نقبل — نولي ذيب سراً</div>
+      <div class="infect-opt" onclick="infectRefuse('${victim}')">🏡 نرفض — نموت كقروي</div>
+    </div>`, []);
+}
+
+function infectJoin(victim) {
+  closeModal();
+  if(!state.infectedPlayers) state.infectedPlayers = [];
+  state.infectedPlayers.push({ player: victim, originalRole: getPlayerRole(victim) });
+  // Cancel the wolf kill — victim survives and joins secretly
+  state.nightKillTarget = null;
+  log(`${victim} قبل — انضم للذياب سراً (يظهر كـ${getRoleById(getPlayerRole(victim))?getRoleById(getPlayerRole(victim)).name:'قروي'})`, 'info');
+  toast(`☣️ ${victim} ولى ذيب سراً — يحتفظ بدوره الظاهري!`);
+  nextNightStep();
+}
+
+function isInfected(p) {
+  return state.infectedPlayers && state.infectedPlayers.some(x => x.player === p);
+}
+
+function infectRefuse(victim) {
+  closeModal();
+  // victim dies normally
+  toast(`☣️ ${victim} رفض. سيموت الليلة.`);
+  nextNightStep();
+}
+
+function infectSkip() { nextNightStep(); }
+
+function lupNoirSilence(p) {
+  state.silenced = p;
+  log(`${p} ممنوع من الكلام (الذيب الأسود)`, 'info');
+  toast(`🖤 ${p} ممنوع من الكلام النهار`);
+  nextNightStep();
+}
+function lupNoirSkip() { nextNightStep(); }
+
+function lupRougeReveal(p) {
+  const role = getRoleById(getPlayerRole(p)) || { name: 'قروي', emoji: '🏡' };
+  // Track for night report
+  state.lupRougeSawPlayer = p;
+  state.lupRougeSawRole = role.name;
+  toast(`🔴 ${p}: ${role.emoji} ${role.name}`);
+  showModal('🔴 الذيب الأحمر', `<div class="player-card-role">
+    <div class="role-big-emoji">${role.emoji}</div>
+    <div class="role-big-name">${p}</div>
+    <div style="color:var(--text2)">${role.name}</div>
+  </div>`, [{ label: 'حسناً', btnClass: 'btn-primary', fn: nextNightStep }]);
+}
+
+function voyanteSee(p) {
+  const role = getRoleById(getPlayerRole(p)) || { name: 'قروي', emoji: '🏡' };
+  const isW = isWolf(p);
+  // Track for night report
+  state.voyanteSawPlayer = p;
+  state.voyanteSawRole = role.name;
+  showModal('🔮 العرّافة ترى', `<div class="player-card-role">
+    <div class="role-big-emoji">${role.emoji}</div>
+    <div class="role-big-name">${p}</div>
+    <div class="${isW?'wolf-highlight':'village-highlight'}">${role.name}</div>
+  </div>`, [{ label: 'حسناً', btnClass: 'btn-primary', fn: nextNightStep }]);
+}
+
+function witchSave() {
+  state.witchSaveUsed = true;
+  state.nightSaveTarget = state.nightKillTarget;
+  state.nightKillTarget = null;
+  toast(`💊 الساحرة أنقذت ${state.nightSaveTarget}!`);
+  log(`الساحرة أنقذت ${state.nightSaveTarget}`, 'info');
+  // After saving, show updated witch card so she can still poison if available
+  if(!state.witchKillUsed) {
+    const el = document.getElementById('nightContent');
+    const step = state.activeNightSteps[state.nightStepIndex];
+    el.innerHTML = `<div class="active-step-card">
+      <div class="step-title">🧙 الساحرة — ${step.player}</div>
+      <div class="step-instruction">
+        <span style="color:#5dcc85">✅ أنقذت ${state.nightSaveTarget}</span><br><br>
+        💊 دواء الإنقاذ: ❌ مستعمل<br>
+        🧪 السم: ✅ متاح
+      </div>
+    </div>
+    <div class="action-grid">
+      <button class="action-btn" disabled style="opacity:0.4;grid-column:span 1">💊 ما تنجمش تنقذ</button>
+      <button class="action-btn danger" onclick="showWitchKill()">🧪 تسم شخص</button>
+      <button class="action-btn" onclick="witchSkip()" style="grid-column:span 2">تتجاوز</button>
+    </div>`;
+  } else {
+    nextNightStep();
+  }
+}
+
+function showWitchKill() {
+  const others = alivePlayers();
+  showModal('🧪 الساحرة تقتل', '<div class="infect-options">' + others.map(p=>'<div class="infect-opt" onclick="witchKill(\''+p+'\')">'+p+'</div>').join('') + '</div>', [{ label: 'تتجاوز', btnClass: 'btn-ghost', fn: nextNightStep }]);
+}
+
+function witchKill(p) {
+  closeModal();
+  state.witchKillUsed = true;
+  state.witchKillTarget = p;
+  log(`الساحرة سممت ${p}`, 'info');
+  toast(`🧪 الساحرة سممت ${p}!`);
+  nextNightStep();
+}
+
+function witchSkip() { nextNightStep(); }
+
+function cupidChoose1(p) {
+  state.lovers = [p];
+  const others = alivePlayers().filter(x=>x!==p);
+  document.getElementById('cupidChoice1').innerHTML = `<p style="color:var(--village-highlight);margin-bottom:8px">الأول: <strong>${p}</strong></p>
+    <div class="section-title">اختار الثاني</div>
+    ${others.map(x=>`<div class="infect-opt" onclick="cupidChoose2('${x}')">${x}</div>`).join('')}`;
+}
+
+function cupidChoose2(p) {
+  state.lovers.push(p);
+  log(`كيوبيد ربط ${state.lovers[0]} و${state.lovers[1]}`, 'info');
+  toast(`💘 ${state.lovers[0]} و${state.lovers[1]} في الحب!`);
+  nextNightStep();
+}
+
+function barbierReveal(p) {
+  const barber = state.activeNightSteps[state.nightStepIndex].player;
+  const role = getRoleById(getPlayerRole(p));
+  const wolf = isWolf(p);
+  showModal('✂️ الحلاق — النتيجة', `<div class="player-card-role">
+    <div class="role-big-emoji">${role?role.emoji:'🏡'}</div>
+    <div class="role-big-name">${p}</div>
+    <div class="${wolf?'wolf-highlight':'village-highlight'}">${role?role.name:'قروي عادي'}</div>
+  </div>`, [
+    { label: wolf?(p+' مات (ذيب)!'):(barber+' مات (غلط)!'), btnClass: 'btn-primary', fn: () => {
+      if(wolf) {
+        killPlayer(p, 'كشفه الحلاق');
+        toast(`✂️ ${p} مات! كان ذيب.`);
+      } else {
+        killPlayer(barber, 'غلط في الكشف');
+        killPlayer(p, 'كشفه الحلاق (غلط)');
+        toast(`✂️ مات الحلاق ${barber} و${p}!`);
+      }
+      log(`الحلاق كشف ${p} (${role?role.name:'قروي'}) — ${wolf?'صح':'غلط'}`, 'info');
+      nextNightStep();
+    }}
+  ]);
+}
+
+function elianReveal(p) {
+  const elian = state.activeNightSteps[state.nightStepIndex].player;
+  const role = getRoleById(getPlayerRole(p));
+  showModal('🎯 إليان — النتيجة', `<div class="player-card-role">
+    <div class="role-big-emoji">${role?role.emoji:'🏡'}</div>
+    <div class="role-big-name">${p}</div>
+    <div>${role?role.name:'قروي عادي'}</div>
+  </div>
+  <p style="color:var(--text2);font-size:0.85em;margin-top:8px">هل إليان صح في الكشف؟</p>`, [
+    { label: '✅ صح — يموت الشخص', btnClass: 'btn-primary', fn: () => {
+      killPlayer(p, 'كشفه إليان');
+      log(`إليان كشف ${p} — صح`, 'info');
+      toast(`🎯 ${p} مات!`);
+      nextNightStep();
+    }},
+    { label: '❌ غلط — إليان يموت', btnClass: 'btn-ghost', fn: () => {
+      killPlayer(elian, 'غلط في الكشف');
+      log(`إليان ${elian} غلط — مات`, 'info');
+      toast(`💀 إليان مات!`);
+      nextNightStep();
+    }}
+  ]);
+}
+
+function puteChoose(p) {
+  state.puteTarget = p;
+  if(p) log(`اللعوبة نامت مع ${p}`, 'info');
+  nextNightStep();
+}
+
+function corbeauChoose(p) {
+  state.corbeauTarget = p;
+  if(p) { log(`الغراب وضع علامة على ${p}`, 'info'); toast(`🐦‍⬛ ${p} عنده زوز صوابع زيادة!`); }
+  nextNightStep();
+}
+
+function bergerChooseCount(count, bergerPlayer) {
+  const others = alivePlayers().filter(p=>p!==bergerPlayer && !state.bergerActions.find(a=>a.player===p));
+  state.bergerPendingCount = count;
+  state.bergerSentThisRound = 0;
+  // Show player list in modal
+  showModal(`🐑 الراعي — اختار شكون يبعث عليه`, `
+    <div style="font-size:0.85em;color:var(--text2);margin-bottom:12px">يبعث ${count} خروف على ${count===1?'شخص':'شخص أو شخصين'}</div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="bergerSend('${p}','${bergerPlayer}')">${p}</div>`).join('')}</div>`, []);
+}
+
+function bergerSend(p, bergerPlayer) {
+  if(state.shepherdSheep <= 0) { toast('ما بقاش خراف!'); return; }
+  // isWolf checks enfant + infected
+  const wolf = isWolf(p);
+  state.shepherdSheep--;
+  if(wolf) {
+    state.bergerActions.push({ player: p, isWolf: true, returned: false });
+    log(`الراعي رمى خروف على ${p} (ذيب) — خسر الخروف`, 'info');
+    toast(`🐑 الخروف اختفى عند ${p}...`);
+  } else {
+    state.bergerActions.push({ player: p, isWolf: false, returned: true });
+    log(`الراعي رمى خروف على ${p} (قروي) — رجع`, 'info');
+    toast(`🐑 الخروف رجع! ${p} قروي.`);
+    state.shepherdSheep++;
+  }
+  state.bergerSentThisRound = (state.bergerSentThisRound||0) + 1;
+
+  // If needs to send more (chose 2), show list again
+  if(state.bergerPendingCount === 2 && state.bergerSentThisRound < 2 && state.shepherdSheep > 0) {
+    const remaining = alivePlayers().filter(q=>q!==bergerPlayer && !state.bergerActions.find(a=>a.player===q));
+    if(remaining.length > 0) {
+      document.getElementById('modalContent').innerHTML = `
+        <div style="font-size:0.85em;color:var(--text2);margin-bottom:12px">بعث خروف على ${p}. اختار الشخص الثاني:</div>
+        <div class="infect-options">${remaining.map(q=>`<div class="infect-opt" onclick="bergerSend('${q}','${bergerPlayer}')">${q}</div>`).join('')}</div>`;
+      return;
+    }
+  }
+  closeModal();
+  // Re-render the berger step
+  renderStep(state.activeNightSteps[state.nightStepIndex], document.getElementById('nightContent'));
+  document.getElementById('nightNextBtn').style.display = 'flex';
+}
+
+function enfantChoose(p) {
+  state.enfantSauvageParent = p;
+  log(`الطفل البري يتبع ${p}`, 'info');
+  toast(`🧒 الطفل البري يتبع ${p}`);
+  nextNightStep();
+}
+
+function nextNightStep() {
+  state.nightStepIndex++;
+  // Reset berger round tracking when moving past berger step
+  state.bergerSentThisRound = 0;
+  state.bergerPendingCount = 0;
+  renderNightStep();
+}
+
+// =============================================
+// DAY
+// =============================================
+function startDay() {
+  state.phase = 'day';
+  const nightLog = []; // detailed log for narrator
+
+  // Protecteur: if nightKillTarget is protected, cancel kill
+  if(state.nightKillTarget && state.protectedTarget === state.nightKillTarget) {
+    nightLog.push(`🛡️ الحارس حمى <strong>${state.nightKillTarget}</strong> — نجا من الذياب!`);
+    state.nightKillTarget = null;
+  }
+  // Save lastProtected and reset protectedTarget
+  state.lastProtectedTarget = state.protectedTarget;
+  state.protectedTarget = null;
+
+  // Apply night kills
+  const deaths = [];
+  if(state.nightKillTarget && !state.dead[state.nightKillTarget]) {
+    const tRole = getPlayerRole(state.nightKillTarget);
+    if(tRole === 'ancien' && !state.ancienDead) {
+      state.ancienDead = true;
+      nightLog.push(`👴 الشيخ <strong>${state.nightKillTarget}</strong> نجا من الذياب — روح إضافية!`);
+      state.nightKillTarget = null;
+    } else {
+      deaths.push({ name: state.nightKillTarget, reason: 'قتلهم الذياب' });
+      nightLog.push(`🐺 الذياب قتلو <strong>${state.nightKillTarget}</strong>`);
+    }
+  } else if(!state.nightKillTarget && aliveWolves().length > 0) {
+    nightLog.push(`🐺 الذياب ما قتلوش حد الليلة`);
+  }
+
+  // Witch kill
+  if(state.witchKillTarget && !state.dead[state.witchKillTarget]) {
+    deaths.push({ name: state.witchKillTarget, reason: 'سم الساحرة' });
+    nightLog.push(`🧪 الساحرة سممت <strong>${state.witchKillTarget}</strong>`);
+    state.witchKillTarget = null;
+  }
+
+  // Check pute
+  const puteEntry = Object.entries(state.assignedRoles).find(([p,r])=>r==='pute'&&isAlive(p));
+  const puteName = puteEntry ? puteEntry[0] : null;
+  if(state.puteTarget) {
+    // If puteTarget died, pute dies too
+    if(deaths.find(d=>d.name===state.puteTarget)) {
+      if(puteName && !deaths.find(d=>d.name===puteName)) {
+        deaths.push({ name: puteName, reason: 'ماتت مع ضيفها' });
+        nightLog.push(`💋 اللعوبة <strong>${puteName}</strong> ماتت مع <strong>${state.puteTarget}</strong>`);
+      }
+    }
+    // If pute died, puteTarget dies too
+    if(deaths.find(d=>d.name===puteName) && state.puteTarget && !deaths.find(d=>d.name===state.puteTarget)) {
+      deaths.push({ name: state.puteTarget, reason: 'نام مع اللعوبة' });
+      nightLog.push(`💋 <strong>${state.puteTarget}</strong> مات مع اللعوبة`);
+    }
+  }
+
+  // Apply deaths
+  const uniqueDeaths = [...new Set(deaths.map(d=>d.name))];
+  uniqueDeaths.forEach(name => {
+    if(!state.dead[name]) {
+      const d = deaths.find(x=>x.name===name);
+      killPlayer(name, d?d.reason:'');
+    }
+  });
+
+  // Enfant sauvage check — parent died this night
+  if(state.enfantSauvageParent && !state.enfantBecameWolf) {
+    if(state.dead[state.enfantSauvageParent]) {
+      const enfant = Object.entries(state.assignedRoles).find(([p,r])=>r==='enfant_sauvage'&&isAlive(p));
+      if(enfant) {
+        state.enfantBecameWolf = true;
+        nightLog.push(`🧒🐺 <strong>${enfant[0]}</strong> ولى ذيب — مات قدوته <strong>${state.enfantSauvageParent}</strong>! سيقوم مع الذياب من الآن`);
+        log(`${enfant[0]} أصبح ذيباً (مات قدوته ${state.enfantSauvageParent})`, 'info');
+      }
+    }
+  }
+
+  // Build narrator summary
+  if(uniqueDeaths.length === 0 && !nightLog.find(l=>l.includes('نجا'))) {
+    nightLog.unshift('😮 <strong>ما مات حد الليلة!</strong>');
+  }
+
+  const publicDeaths = uniqueDeaths.filter(n => state.dead[n]);
+
+  // Special announcements
+  if(state.silenced) nightLog.push(`🖤 <strong>${state.silenced}</strong> ممنوع من الكلام النهار (الذيب الأسود)`);
+  if(state.corbeauTarget) nightLog.push(`🐦‍⬛ <strong>${state.corbeauTarget}</strong> عنده +2 صوت في التصويت`);
+  if(state.ancienVillageRolesDropped && !state.ancienVillageRolesDropped_shown) {
+    nightLog.push('⚠️ الشيخ مات بالتصويت — <strong>كل الأدوار الخاصة للقرويين سقطت!</strong>');
+    state.ancienVillageRolesDropped_shown = true;
+  }
+
+  // Public deaths with roles
+  const publicDeathsHTML = publicDeaths.length > 0 ? publicDeaths.map(n => {
+    const rId = getPlayerRole(n);
+    const role = getRoleById(rId) || { name: 'قروي عادي', emoji: '🏡' };
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(231,76,60,0.1);border-radius:10px;margin-bottom:6px;">
+      <span style="font-size:1.3em">${role.emoji}</span>
+      <div><div style="font-weight:700">${n}</div><div style="font-size:0.8em;color:${isWolf(n)||state.infectedPlayers&&state.infectedPlayers.some(x=>x.player===n)?'#b980e0':'#5dcc85'}">${role.name}</div></div>
+    </div>`;
+  }).join('') : '';
+
+  // Voyante report - shows real allegiance
+  if(state.voyanteSawPlayer) {
+    const vp = state.voyanteSawPlayer;
+    const vRole = getRoleById(getPlayerRole(vp)) || { name: 'قروي عادي', emoji: '🏡' };
+    const vIsWolf = isWolf(vp);
+    const wolfNote = isInfected(vp) ? ` <span style="color:#b980e0">(☣️ مُعدى — ذيب سري!)</span>` : '';
+    nightLog.push(`🔮 العرّافة شافت: <strong>${vp}</strong> → ${vRole.emoji} <strong>${vRole.name}</strong>${wolfNote} — <span style="${vIsWolf?'color:#b980e0':'color:#5dcc85'}">${vIsWolf?'ذيب!':'قروي'}</span>`);
+  }
+
+  // Loup Rouge report - shows real role
+  if(state.lupRougeSawPlayer) {
+    const lrp = state.lupRougeSawPlayer;
+    const lrRole = getRoleById(getPlayerRole(lrp)) || { name: 'قروي عادي', emoji: '🏡' };
+    const lrInfected = isInfected(lrp);
+    const infectedNote = lrInfected ? ` <span style="color:#ff9800">(مُعدى — ذيب سري!)</span>` : '';
+    nightLog.push(`🔴 الذيب الأحمر شاف: <strong>${lrp}</strong> → ${lrRole.emoji} <strong>${lrRole.name}</strong>${infectedNote}`);
+  }
+
+  // Infected players reminder for narrator
+  if(state.infectedPlayers && state.infectedPlayers.length > 0) {
+    state.infectedPlayers.filter(x => isAlive(x.player)).forEach(x => {
+      const origRole = getRoleById(x.originalRole) || { name: x.originalRole, emoji: '🏡' };
+      nightLog.push(`☣️ تذكير: <strong>${x.player}</strong> مُعدى — ذيب سري! دوره الظاهري: ${origRole.emoji} ${origRole.name}`);
+    });
+  }
+
+  // Berger report
+  if(state.bergerActions && state.bergerActions.length > 0) {
+    state.bergerActions.forEach(a => {
+      if(a.isWolf) {
+        nightLog.push(`🐑 الراعي رمى خروف على <strong>${a.player}</strong> → <span style="color:#b980e0">اختفى (ذيب!)</span>`);
+      } else {
+        nightLog.push(`🐑 الراعي رمى خروف على <strong>${a.player}</strong> → <span style="color:#5dcc85">رجع (قروي)</span>`);
+      }
+    });
+  } else {
+    const bergerAlive = Object.entries(state.assignedRoles).find(([p,r])=>r==='berger'&&isAlive(p));
+    if(bergerAlive) nightLog.push(`🐑 الراعي ما بعثش خروف هذه الليلة`);
+  }
+
+  // Ours report
+  if(state.oursGrowled !== null) {
+    if(state.oursGrowled) {
+      nightLog.push(`🐻 الدب <strong>قرقر</strong> — فما ذيب على جنبه!`);
+    } else {
+      nightLog.push(`🐻 الدب <strong>ما قرقرش</strong> — جيرانه قرويين`);
+    }
+  }
+
+  // Ancien start side
+  if(state.ancienStartSide) {
+    nightLog.push(`👴 الشيخ اختار: يبدأ النقاش من عند <strong>${state.ancienStartSide}</strong>`);
+  }
+
+  // Lovers death announce
+  if(state.lovers.length === 2) {
+    state.lovers.forEach(l => {
+      if(state.dead[l] && !deaths.find(d=>d.name===l)) {
+        nightLog.push(`💔 <strong>${l}</strong> مات من الحزن على حبيبه/حبيبتها`);
+      }
+    });
+  }
+
+  // Show detailed modal for narrator
+  const summaryHTML = `
+    <div style="margin-bottom:10px;font-size:0.8em;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px">ملخص الليلة للراوي 🎭</div>
+    ${nightLog.map(l=>`<div style="padding:8px 10px;background:var(--surface);border-radius:10px;margin-bottom:6px;font-size:0.88em;line-height:1.5">${l}</div>`).join('')}
+    <div class="divider"></div>
+    <div style="font-size:0.8em;color:var(--text2);font-weight:700;margin-bottom:8px">📢 تقول للناس:</div>
+    ${publicDeaths.length>0
+      ? `<div style="margin-bottom:8px">${publicDeathsHTML}</div>`
+      : '<div class="info-box">📢 <strong>ما مات حد الليلة!</strong></div>'
+    }`;
+  showModal(`🌅 صباح اليوم ${state.night}`, summaryHTML, [
+    { label: '📢 ابدأ النقاش', btnClass: 'btn-primary', fn: () => { renderDayVote(); updateGameUI(); } }
+  ]);
+
+  // Reset night vars
+  state.nightKillTarget = null;
+  state.witchKillTarget = null;
+  state.puteTarget = null;
+  state.corbeauTarget = null;
+
+  document.getElementById('phaseBadge').className = 'day-badge';
+  document.getElementById('phaseBadge').textContent = '☀️ نهار';
+}
+
+function renderDayVote() {
+  gameTab('day', document.querySelectorAll('.tab')[1]);
+  const el = document.getElementById('dayContent');
+  state.votes = {};
+  alivePlayers().forEach(p => { state.votes[p] = 0; });
+  // Corbeau bonus
+  if(state.corbeauTarget && state.votes[state.corbeauTarget] !== undefined) {
+    state.votes[state.corbeauTarget] = 2;
+  }
+  renderVoteTable();
+  renderDaySignalButtons();
+}
+
+function renderDaySignalButtons() {
+  const el = document.getElementById('daySignalButtons');
+  if(!el) return;
+
+  const elianEntry = Object.entries(state.assignedRoles).find(([p,r])=>r==='elian'&&isAlive(p));
+  const barbierEntry = Object.entries(state.assignedRoles).find(([p,r])=>r==='barbier'&&isAlive(p));
+  if(!elianEntry && !barbierEntry) { el.innerHTML=''; return; }
+
+  let html = `<div style="background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.4);border-radius:14px;padding:12px;margin-bottom:12px;">
+    <div style="font-size:0.8em;font-weight:700;color:#ff9800;margin-bottom:8px;">🚨 إشارة في النهار</div>`;
+  if(elianEntry) {
+    html += `<button class="action-btn" style="width:100%;margin-bottom:6px;border-color:#ff9800;color:#ff9800;" onclick="triggerElianDay('${elianEntry[0]}');this.disabled=true;this.style.opacity='0.4'">🎯 إليان (${elianEntry[0]}) شامى الراوي</button>`;
+  }
+  if(barbierEntry) {
+    html += `<button class="action-btn" style="width:100%;border-color:#00bcd4;color:#00bcd4;" onclick="triggerBarbierDay('${barbierEntry[0]}');this.disabled=true;this.style.opacity='0.4'">✂️ الحلاق (${barbierEntry[0]}) شامى الراوي</button>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function triggerElianDay(elianName) {
+  // Narrator puts everyone to sleep, elian wakes up
+  const others = alivePlayers().filter(p=>p!==elianName);
+  showModal('🎯 إليان — الراوي يرقّد الكل', `
+    <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:12px;margin-bottom:12px;font-size:0.9em;color:var(--text2);">
+      الراوي يرقّد جميع اللاعبين ويفيّق إليان <strong>${elianName}</strong><br>
+      إليان يكشف دور شخص بالضبط (ذيب أو قروي مع الدور المحدد)
+    </div>
+    <div class="section-title">إليان يختار شكون يكشف</div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="elianDayReveal('${elianName}','${p}')">${p}</div>`).join('')}</div>`, []);
+}
+
+function elianDayReveal(elianName, target) {
+  closeModal();
+  const role = getRoleById(getPlayerRole(target)) || { name: 'قروي عادي', emoji: '🏡' };
+  const wolf = isWolf(target);
+  // Show all roles for Elian to declare
+  const allRolesOptions = ROLES.map(r=>`<div class="infect-opt" onclick="elianDayDeclare('${elianName}','${target}','${r.id}')">${r.emoji} ${r.name}</div>`).join('');
+  const villageoisOpt = `<div class="infect-opt" onclick="elianDayDeclare('${elianName}','${target}','villageois')">🏡 قروي عادي</div>`;
+  showModal(`🎯 إليان يكشف دور ${target}`, `
+    <div style="font-size:0.85em;color:var(--text2);margin-bottom:12px;">إليان لازم يقول الدور بالضبط. الراوي يختار النتيجة:</div>
+    <div class="section-title">الدور الحقيقي لـ ${target} هو: <strong style="color:${wolf?'#b980e0':'#5dcc85'}">${role.emoji} ${role.name}</strong></div>
+    <div class="divider"></div>
+    <div style="font-size:0.85em;color:var(--text2);margin-bottom:8px;">إليان قال الدور:</div>
+    <div style="max-height:250px;overflow-y:auto;">
+      ${villageoisOpt}
+      ${allRolesOptions}
+    </div>`, []);
+}
+
+function elianDayDeclare(elianName, target, declaredRoleId) {
+  closeModal();
+  const actualRoleId = getPlayerRole(target) || 'villageois';
+  const correct = declaredRoleId === actualRoleId;
+  const actualRole = getRoleById(actualRoleId) || { name: 'قروي عادي', emoji: '🏡' };
+  const declaredRole = getRoleById(declaredRoleId) || { name: 'قروي عادي', emoji: '🏡' };
+
+  if(correct) {
+    showModal('🎯 إليان — صح!', `
+      <div class="player-card-role">
+        <div class="role-big-emoji">${actualRole.emoji}</div>
+        <div class="role-big-name">${target}</div>
+        <div style="color:#5dcc85">دور صحيح! ${actualRole.name}</div>
+      </div>
+      <p style="color:var(--text2);text-align:center;margin-top:8px;">${target} يموت وإليان يكمل اللعبة.</p>`,
+      [{ label: `💀 ${target} يموت`, btnClass: 'btn-primary', fn: () => {
+        killPlayer(target, 'كشفه إليان');
+        log(`إليان ${elianName} كشف ${target} صح (${actualRole.name})`, 'info');
+        toast(`🎯 ${target} مات! إليان كشفه.`);
+        updateGameUI();
+        renderDaySignalButtons();
+      }}]);
+  } else {
+    showModal('🎯 إليان — غلط!', `
+      <div class="player-card-role">
+        <div class="role-big-emoji">💀</div>
+        <div class="role-big-name">${elianName}</div>
+        <div style="color:#e74c3c">إليان غلط — يموت هو!</div>
+      </div>
+      <p style="color:var(--text2);text-align:center;margin-top:8px;">الدور الحقيقي لـ${target}: ${actualRole.emoji} ${actualRole.name}</p>`,
+      [{ label: `💀 إليان يموت`, btnClass: 'btn-primary', fn: () => {
+        killPlayer(elianName, 'غلط في الكشف');
+        log(`إليان ${elianName} غلط في كشف ${target} — مات`, 'info');
+        toast(`💀 إليان مات! غلط.`);
+        updateGameUI();
+        renderDaySignalButtons();
+      }}]);
+  }
+}
+
+function triggerBarbierDay(barbierName) {
+  const others = alivePlayers().filter(p=>p!==barbierName);
+  showModal('✂️ الحلاق — الراوي يرقّد الكل', `
+    <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:12px;margin-bottom:12px;font-size:0.9em;color:var(--text2);">
+      الراوي يرقّد جميع اللاعبين ويفيّق الحلاق <strong>${barbierName}</strong><br>
+      الحلاق يقول فقط "ذيب" — ما يلزمش يفصّل الدور
+    </div>
+    <div class="section-title">الحلاق يختار شكون يكشف</div>
+    <div class="infect-options">${others.map(p=>`<div class="infect-opt" onclick="barbierDayReveal('${barbierName}','${p}')">${p}</div>`).join('')}</div>`, []);
+}
+
+function barbierDayReveal(barbierName, target) {
+  closeModal();
+  const wolf = isWolf(target);
+  const actualRole = getRoleById(getPlayerRole(target)) || { name: 'قروي عادي', emoji: '🏡' };
+
+  if(wolf) {
+    showModal('✂️ الحلاق — صح! ذيب!', `
+      <div class="player-card-role">
+        <div class="role-big-emoji">${actualRole.emoji}</div>
+        <div class="role-big-name">${target}</div>
+        <div style="color:#b980e0">ذيب! ${actualRole.name}</div>
+      </div>
+      <p style="color:var(--text2);text-align:center;margin-top:8px;">${target} يموت.</p>`,
+      [{ label: `💀 ${target} يموت`, btnClass: 'btn-primary', fn: () => {
+        killPlayer(target, 'كشفه الحلاق');
+        log(`الحلاق ${barbierName} كشف ${target} — ذيب — صح`, 'info');
+        toast(`✂️ ${target} مات! كان ذيب.`);
+        updateGameUI();
+        renderDaySignalButtons();
+      }}]);
+  } else {
+    showModal('✂️ الحلاق — غلط! ما هو ذيب', `
+      <div class="player-card-role">
+        <div class="role-big-emoji">${actualRole.emoji}</div>
+        <div class="role-big-name">${target}</div>
+        <div style="color:#5dcc85">${actualRole.name} — مش ذيب!</div>
+      </div>
+      <p style="color:var(--text2);text-align:center;margin-top:8px;">الحلاق يموت و${target} يموت معاه.</p>`,
+      [{ label: `💀 الحلاق و${target} يموتو`, btnClass: 'btn-primary', fn: () => {
+        killPlayer(barbierName, 'غلط في الكشف');
+        killPlayer(target, 'كشفه الحلاق غلط');
+        log(`الحلاق ${barbierName} غلط في كشف ${target} — الاثنان ماتو`, 'info');
+        toast(`✂️ مات الحلاق و${target}!`);
+        updateGameUI();
+        renderDaySignalButtons();
+      }}]);
+  }
+}
+
+function renderVoteTable() {
+  const el = document.getElementById('dayContent');
+  const alive = alivePlayers();
+  el.innerHTML = `<div class="vote-section">
+    <div class="vote-title">التصويت</div>
+    ${state.silenced ? '<div class="warning-box">🖤 ' + state.silenced + ' ممنوع من الكلام!</div>' : ''}
+    ${alive.map(p => `<div class="vote-row">
+      <span class="vote-name">${p} ${state.corbeauTarget===p?'🐦‍⬛':''}</span>
+      <button class="vote-btn" onclick="changeVote('${p}',-1)">−</button>
+      <span class="vote-num">${state.votes[p]||0}</span>
+      <button class="vote-btn" onclick="changeVote('${p}',1)">+</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+function changeVote(p, delta) {
+  state.votes[p] = Math.max(0, (state.votes[p]||0) + delta);
+  renderVoteTable();
+}
+
+function executeVote() {
+  const alive = alivePlayers();
+  const maxVotes = Math.max(...alive.map(p=>state.votes[p]||0));
+  if(maxVotes === 0) { toast('ما فما أصوات!'); return; }
+  const topPlayers = alive.filter(p=>(state.votes[p]||0)===maxVotes);
+  
+  if(topPlayers.length > 1) {
+    // Tie
+    const ancienPlayer = Object.entries(state.assignedRoles).find(([p,r])=>r==='ancien'&&isAlive(p));
+    if(ancienPlayer) {
+      showModal('⚖️ تعادل!', `<p style="margin-bottom:12px;color:var(--text2)">تعادل بين: <strong>${topPlayers.join('، ')}</strong><br>الشيخ <strong>${ancienPlayer[0]}</strong> يختار شكون يموت.</p>
+      <div class="infect-options">${topPlayers.map(p=>`<div class="infect-opt" onclick="ancienBreakTie('${p}')">${p}</div>`).join('')}
+      <div class="infect-opt" style="opacity:0.5" onclick="ancienBreakTie(null)">ما يموتش حد</div></div>`, []);
+    } else {
+      showModal('⚖️ تعادل!', `<p style="color:var(--text2)">تعادل — ما يموتش حد هذا النهار.</p>`, [
+        { label: 'حسناً', btnClass: 'btn-primary', fn: nextNight }
+      ]);
+    }
+  } else {
+    executeKill(topPlayers[0]);
+  }
+}
+
+function ancienBreakTie(p) {
+  closeModal();
+  if(!p) { toast('ما مات حد.'); nextNight(); return; }
+  executeKill(p);
+}
+
+function executeKill(p) {
+  const roleId = getPlayerRole(p);
+  const role = getRoleById(roleId);
+  
+  // Ancien by vote
+  if(roleId === 'ancien' && !state.ancienDead) {
+    state.ancienDead = true;
+    // Drop village special roles
+    Object.entries(state.assignedRoles).forEach(([pl, r]) => {
+      const rd = getRoleById(r);
+      if(rd && rd.team === 'village' && r !== 'villageois' && r !== 'ancien' && isAlive(pl)) {
+        state.assignedRoles[pl] = 'villageois';
+      }
+    });
+    state.ancienVillageRolesDropped = true;
+    log(`الشيخ ${p} مات بالتصويت — أدوار القرويين سقطت!`, 'death');
+    toast(`👴 الشيخ مات! الأدوار الخاصة سقطت.`);
+  }
+
+  killPlayer(p, 'التصويت');
+  toast(`⚖️ تم إعدام ${p}!`);
+  
+  const roleDisplay = getRoleById(roleId) || { emoji: '🏡', name: 'قروي عادي' };
+  const isW = isWolf(p);
+  showModal('⚖️ نتيجة التصويت', `<div class="player-card-role">
+    <div class="role-big-emoji">${roleDisplay.emoji}</div>
+    <div class="role-big-name">${p}</div>
+    <div class="${isW?'wolf-highlight':'village-highlight'}">${roleDisplay.name}</div>
+    <div style="color:var(--text2);font-size:0.85em">كان هذا دوره</div>
+  </div>`, [{ label: '🌙 الليلة التالية', btnClass: 'btn-primary', fn: nextNight }]);
+  
+  state.silenced = null;
+  updateGameUI();
+}
+
+function nextNight() {
+  state.night++;
+  state.phase = 'night';
+  state.nightStepIndex = 0;
+  buildNightSteps();
+  document.getElementById('roundNum').textContent = state.night;
+  document.getElementById('phaseBadge').className = 'night-badge';
+  document.getElementById('phaseBadge').textContent = '🌙 ليل';
+  renderNightStep();
+  gameTab('night', document.querySelectorAll('.tab')[0]);
+  updateGameUI();
+}
+
+// =============================================
+// GAME UI
+// =============================================
+function updateGameUI() {
+  const alive = alivePlayers();
+  document.getElementById('aliveCount').textContent = alive.length;
+  document.getElementById('statWolf').textContent = aliveWolves().length;
+  document.getElementById('statVillage').textContent = aliveVillage().length;
+  document.getElementById('statSolo').textContent = alivePlayers().filter(p=>isSolo(p)).length;
+
+  // Players list tab
+  const gpList = document.getElementById('gamePlayersList');
+  gpList.innerHTML = state.players.map(p => {
+    const dead = state.dead[p];
+    const roleId = getPlayerRole(p);
+    const role = getRoleById(roleId);
+    const isW = isWolf(p);
+    const isSl = isSolo(p);
+    let badgeClass = dead ? 'badge-dead' : isW ? 'badge-wolf' : isSl ? 'badge-solo' : 'badge-village';
+    return `<div class="player-row ${dead?'dead':''}">
+      <div class="player-avatar">${dead?'💀':'👤'}</div>
+      <div class="player-name-g">${p}</div>
+      <span class="player-role-badge ${badgeClass}">${role?role.emoji+' '+role.name:'🏡 قروي'}</span>
+    </div>`;
+  }).join('');
+
+  // Log tab
+  const fullLog = document.getElementById('fullLog');
+  fullLog.innerHTML = `<div class="log-title">سجل الأحداث</div>` + 
+    [...state.eventLog].reverse().map(e => `<div class="log-item">
+      <span class="${e.phase==='night'?'log-night':'log-day'}">${e.phase==='night'?'🌙':'☀️'}${e.night}</span>
+      <span>${e.msg}</span>
+    </div>`).join('');
+}
+
+function gameTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('tabNight').style.display = tab==='night'?'block':'none';
+  document.getElementById('tabDay').style.display = tab==='day'?'block':'none';
+  document.getElementById('tabPlayers').style.display = tab==='players'?'block':'none';
+  document.getElementById('tabLog').style.display = tab==='log'?'block':'none';
+}
+
+// =============================================
+// INIT
+// =============================================
+// Init seat count display
+document.getElementById('seatCount').textContent = state.seatCount;
+// Render roles info screen
+renderRolesInfo();
+
+// PWA Service Worker
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
