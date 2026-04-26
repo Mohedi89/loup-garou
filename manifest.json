@@ -1,0 +1,17 @@
+{
+  "name": "لعبة الذئب",
+  "short_name": "الذئب",
+  "description": "Loup Garou — النسخة الكاملة بالدارجة",
+  "start_url": "./loup-garou.html",
+  "display": "standalone",
+  "background_color": "#0a0a14",
+  "theme_color": "#0d0d1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://em-content.zobj.net/source/twitter/376/wolf_1f43a.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
